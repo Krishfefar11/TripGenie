@@ -17,13 +17,13 @@ const HomePage = () => {
             Next-Gen Travel Planning
           </span>
           <h1 className="mt-6 text-5xl md:text-7xl font-bold text-slate-900 leading-tight">
-            Your Personal AI <br />
+            Your Personal <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
               Travel Architect
             </span>
           </h1>
           <p className="mt-6 text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            TripGenie uses RAG-powered AI to craft personalized RAG-based travel itineraries 
+            TripGenie uses advanced data retrieval to craft personalized travel itineraries 
             based on real travel data and your unique preferences.
           </p>
         </motion.div>
@@ -39,8 +39,8 @@ const HomePage = () => {
       <section className="grid md:grid-cols-3 gap-8 px-4 pb-20">
         {[
           {
-            title: 'RAG-Based Intelligence',
-            desc: 'Our AI retrieves information from thousands of travel blogs and documents to ensure accuracy.',
+            title: 'Smart Intelligence',
+            desc: 'Our system retrieves information from thousands of travel blogs and documents to ensure accuracy.',
             icon: Zap,
             color: 'bg-orange-50 text-orange-500'
           },
@@ -52,7 +52,7 @@ const HomePage = () => {
           },
           {
             title: 'Contextual Chat',
-            desc: 'Follow up with our AI assistant anytime to modify your plans or ask for specific tips.',
+            desc: 'Follow up with our smart assistant anytime to modify your plans or ask for specific tips.',
             icon: MessageSquare,
             color: 'bg-blue-50 text-blue-500'
           }

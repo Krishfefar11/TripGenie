@@ -77,4 +77,4 @@ client/
 4. **Generation**: The top-5 most relevant chunks are fed into the LLM as context for generating the final itinerary.
 
 ---
-Built with ❤️ by AI for Travelers.
+Plan your next adventure with TripGenie.

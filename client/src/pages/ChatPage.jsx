@@ -10,7 +10,7 @@ const ChatPage = () => {
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-slate-900 font-outfit flex items-center gap-3">
             <MessageSquare className="w-8 h-8 text-primary" />
-            AI Travel Assistant
+            Smart Travel Guide
           </h1>
           <p className="text-slate-500 font-medium">
             Ask anything about your upcoming trips, local customs, or hidden gems.
@@ -19,7 +19,7 @@ const ChatPage = () => {
 
         <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-primary rounded-xl text-sm font-bold border border-indigo-100/50">
           <Info className="w-4 h-4" />
-          Powered by RAG & Ollama
+          Intelligent Data Retrieval
         </div>
       </div>
 

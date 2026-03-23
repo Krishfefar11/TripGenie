@@ -8,7 +8,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
-      content: "Hello! I'm your TripGenie AI assistant. I have access to your travel documents and general knowledge to help you plan the perfect journey. How can I help you today?" 
+      content: "Hello! welcome to TripGenie. I can help you plan your travel based on your uploaded documents and my travel knowledge. How can I help you today?" 
     }
   ]);
   const [input, setInput] = useState('');
