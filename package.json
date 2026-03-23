@@ -1,0 +1,14 @@
+{
+  "name": "tripgenie",
+  "version": "1.0.0",
+  "description": "TripGenie – AI Travel Planner with RAG-based itinerary generation",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
