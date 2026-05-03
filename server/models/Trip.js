@@ -34,13 +34,11 @@ const tripSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
-    // Budget breakdown
+    // Budget breakdown — stored as Mixed to preserve full nested structure
+    // (total, days, perDay, tier, breakdown: {hotel, food, ...}, perDayBreakdown: {...})
     budgetBreakdown: {
-      hotel: Number,
-      food: Number,
-      travel: Number,
-      activities: Number,
-      miscellaneous: Number,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     // Additional generated content
     travelTips: [String],

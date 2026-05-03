@@ -60,6 +60,39 @@ body {
 
 /* Card Hover */
 .modern-card {
-  @apply bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl 
+  @apply bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl
          hover:border-indigo-100 transition-all duration-500 p-6;
+}
+
+/* ── Print / PDF Styles ── */
+@media print {
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    font-size: 12px;
+  }
+
+  .modern-card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    break-inside: avoid;
+  }
+
+  .glass {
+    background: white !important;
+    backdrop-filter: none !important;
+  }
+
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.2rem !important; }
+
+  /* Force colour printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }

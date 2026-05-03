@@ -47,7 +47,7 @@ CRITICAL INSTRUCTIONS:
 1. USE THE CONTEXT: You MUST prioritize specific names of landmarks, restaurants, and "hidden gems" mentioned in the RELEVANT TRAVEL CONTEXT clips.
 2. NO REPETITIONS: Every day must feature DIFFERENT landmarks and restaurants. Do not recommend the same place twice.
 3. FACTUAL ACCURACY: Ensure restaurants and spots are correctly located. ALERT: Avoid recommending ultra-luxury restaurants (like Michelin-starred ones) for budget/moderate trips unless they have a known affordable takeaway/cafe.
-4. BUDGET ALIGNMENT: The "estimatedCost" for each day should covers ONLY activities and admissions (not food/hotel). It MUST stay close to the "Activities & Admissions" allocation ($${budgetBreakdown?.perDayBreakdown.activities || 'budget-appropriate'}/day).
+4. BUDGET ALIGNMENT: The "estimatedCost" for each day should covers ONLY activities and admissions (not food/hotel). It MUST stay close to the "Activities & Admissions" allocation ($${budgetBreakdown?.perDayBreakdown?.activities || 'budget-appropriate'}/day).
 5. SPECIFICITY: Name specific streets, specific dishes, and specific times.
 6. FORMAT: Respond ONLY with valid JSON. No conversational filler.
 

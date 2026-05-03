@@ -43,8 +43,8 @@ function cosineSimilarity(vecA, vecB) {
  * @returns {Array<{chunkText: string, score: number, documentId: string}>}
  */
 async function searchSimilarChunks(queryVector, topK = 5) {
-  // Load all embeddings from the database
-  const allEmbeddings = await Embedding.find({}).lean();
+  // Load embeddings from the database — capped at 2000 to prevent memory issues at scale
+  const allEmbeddings = await Embedding.find({}).limit(2000).lean();
 
   if (allEmbeddings.length === 0) {
     console.log('⚠️ No embeddings found in database');

@@ -20,7 +20,7 @@ const SavedTripsPage = () => {
   const fetchTrips = async () => {
     try {
       const response = await tripService.getAll();
-      setTrips(response.trips);
+      setTrips(response.trips || []); // FIX: guard against undefined trips field
     } catch (error) {
       console.error('Error fetching trips:', error);
     } finally {

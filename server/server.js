@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
   res.send(`
     <div style="font-family: sans-serif; text-align: center; padding: 50px;">
       <h1>🧞 TripGenie Backend is Live</h1>
-      <p>The API is running on port 5001.</p>
+      <p>The API is running on port ${process.env.PORT || 5001}.</p>
       <p>Please visit the <b>frontend</b> at <a href="http://localhost:5173">http://localhost:5173</a> to use the app.</p>
     </div>
   `);
@@ -56,7 +56,7 @@ mongoose
   .then(() => {
     console.log('✅ Connected to MongoDB');
     
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => {
       console.log(`🧞 TripGenie server running on http://localhost:${PORT}`);
     });
