@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: tripgenie-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: MONGODB_URI
+        sync: false          # paste your Atlas URI in the Render dashboard
+      - key: GROQ_API_KEY
+        sync: false          # paste your Groq key in the Render dashboard
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: FRONTEND_URL
+        sync: false          # paste your Vercel URL e.g. https://trip-genie.vercel.app

@@ -2,7 +2,8 @@
 .env
 dist/
 build/
-uploads/
+uploads/*
+!uploads/.gitkeep
 .DS_Store
 *.log
 .gemini/
@@ -10,3 +11,10 @@ uploads/
 .agents/
 brain/
 /tmp/
+
+# Keep example files in git
+!.env.example
+
+# Word/Office temp and output files
+*.docx
+~$*.docx
