@@ -12,7 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  // withCredentials not needed — TripGenie uses UUID sessionIds in request body, not cookies
 });
 
 export const itineraryService = {
