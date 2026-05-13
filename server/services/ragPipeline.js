@@ -130,10 +130,10 @@ async function generateItinerary(params) {
     { destination, budget, days, interests, budgetBreakdown }
   );
 
-  // Step 5: Generate response with Ollama
-  console.log('🤖 Sending prompt to Ollama...');
-  const rawResponse = await generateWithOllama(prompt, { temperature: 0.7 });
-  console.log('📥 Raw response from Ollama (first 100 chars):', rawResponse.substring(0, 100));
+  // Step 5: Generate response with LLM (Groq → Ollama → Mock)
+  console.log('🤖 Sending prompt to LLM...');
+  const rawResponse = await generateWithOllama(prompt, { temperature: 0.7, maxTokens: 4096 });
+  console.log('📥 Raw LLM response (first 100 chars):', rawResponse.substring(0, 100));
 
   // Step 6: Parse the response
   let itineraryData;

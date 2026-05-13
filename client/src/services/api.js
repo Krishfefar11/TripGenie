@@ -12,6 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 120000, // 2 min — Render free tier can take 60s+ on cold start
   // withCredentials not needed — TripGenie uses UUID sessionIds in request body, not cookies
 });
 
