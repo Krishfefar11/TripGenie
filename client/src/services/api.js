@@ -1,10 +1,18 @@
 import axios from 'axios';
 
+// In development: Vite proxies /api → http://localhost:5001 (see vite.config.js)
+// In production:  points directly to Render backend
+const BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://tripgenie-k0hi.onrender.com/api'
+    : '/api');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 export const itineraryService = {
