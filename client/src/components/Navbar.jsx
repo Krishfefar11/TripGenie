@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Compass, MessageSquare, Heart, Sparkles, Menu, X } from 'lucide-react';
+import { Compass, MessageSquare, Heart, Menu, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -10,9 +10,9 @@ function cn(...inputs) {
 }
 
 const NAV_LINKS = [
-  { name: 'Plan Trip',    path: '/',           icon: Compass },
-  { name: 'AI Chat',      path: '/chat',       icon: MessageSquare },
-  { name: 'Saved Trips',  path: '/saved-trips', icon: Heart },
+  { name: 'Plan Trip',   path: '/',            icon: Compass },
+  { name: 'AI Chat',     path: '/chat',        icon: MessageSquare },
+  { name: 'Saved Trips', path: '/saved-trips', icon: Heart },
 ];
 
 const Navbar = () => {
@@ -21,21 +21,21 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-4 z-50 mx-auto max-w-5xl px-4 print:hidden">
-        <div className="glass px-6 py-3.5 rounded-2xl flex items-center justify-between shadow-xl shadow-indigo-500/5">
+      <nav className="sticky top-0 z-50 bg-pearl border-b border-hairline print:hidden">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group" onClick={() => setMobileOpen(false)}>
-            <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-transform duration-300">
-              <Sparkles className="text-white w-5 h-5" />
+          <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+            <div className="w-8 h-8 bg-ink rounded flex items-center justify-center">
+              <Compass className="text-pearl w-4 h-4" />
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary font-outfit">
+            <span className="font-display text-2xl text-ink">
               TripGenie
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map(({ name, path, icon: Icon }) => {
               const isActive = location.pathname === path;
               return (
@@ -43,14 +43,14 @@ const Navbar = () => {
                   key={path}
                   to={path}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all duration-200 font-medium',
+                    'flex items-center gap-1.5 pb-1 text-ui uppercase border-b-2 transition-colors duration-base',
                     isActive
-                      ? 'bg-indigo-50 text-primary shadow-sm'
-                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'font-display italic text-2xl normal-case tracking-normal text-ink border-ink pb-0'
+                      : 'text-ink-secondary border-transparent hover:text-ink'
                   )}
                 >
-                  <Icon className={cn('w-4 h-4', isActive ? 'text-primary' : 'text-slate-400')} />
-                  {name}
+                  {!isActive && <Icon className="w-3.5 h-3.5" />}
+                  {isActive ? name : name}
                 </Link>
               );
             })}
@@ -58,7 +58,7 @@ const Navbar = () => {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-xl text-slate-500 hover:text-primary hover:bg-indigo-50 transition-colors"
+            className="md:hidden w-8 h-8 flex items-center justify-center text-ink-secondary hover:text-ink transition-colors duration-base"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
@@ -70,11 +70,11 @@ const Navbar = () => {
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ duration: 0.18 }}
-              className="mt-2 glass rounded-2xl shadow-xl shadow-indigo-500/10 overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="md:hidden border-t border-hairline bg-pearl"
             >
               {NAV_LINKS.map(({ name, path, icon: Icon }) => {
                 const isActive = location.pathname === path;
@@ -84,17 +84,13 @@ const Navbar = () => {
                     to={path}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-6 py-4 text-sm font-medium border-b border-slate-100/60 last:border-0 transition-colors',
-                      isActive
-                        ? 'text-primary bg-indigo-50/60'
-                        : 'text-slate-600 hover:text-primary hover:bg-indigo-50/40'
+                      'flex items-center gap-3 px-6 py-4 text-ui uppercase border-b border-hairline last:border-0 transition-colors duration-base',
+                      isActive ? 'text-ink bg-pearl-lift' : 'text-ink-secondary hover:text-ink'
                     )}
                   >
-                    <Icon className={cn('w-4 h-4', isActive ? 'text-primary' : 'text-slate-400')} />
+                    <Icon className="w-4 h-4" />
                     {name}
-                    {isActive && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                    )}
+                    {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-pill bg-sage" />}
                   </Link>
                 );
               })}

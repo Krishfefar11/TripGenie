@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Download, Bookmark, CheckCircle,
-  MapPin, Calendar, DollarSign, Sparkles,
-  Utensils, Camera, CloudSun
+  MapPin, Calendar, DollarSign,
+  Utensils, Camera, CloudSun, Briefcase
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import ItineraryCard from '../components/ItineraryCard';
 import BudgetBreakdown from '../components/BudgetBreakdown';
 import PackingList from '../components/PackingList';
@@ -68,44 +67,40 @@ const ItineraryPage = () => {
   } = data;
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4 space-y-10 animate-fade-in print:py-4 print:space-y-6">
+    <div className="max-w-6xl mx-auto py-10 px-4 space-y-12 print:py-4 print:space-y-6">
 
       {/* ── Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
-      >
-        <div className="space-y-3">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-4">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors group print:hidden"
+            className="flex items-center gap-2 text-ink-secondary hover:text-ink transition-colors duration-base print:hidden"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-medium">Back to Planner</span>
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Back to Planner</span>
           </button>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 font-outfit leading-tight">
+          <div className="flex flex-wrap items-end gap-4">
+            <h1 className="font-display text-h1-sm md:text-h1 text-ink leading-none">
               {destination}
             </h1>
-            <span className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md shadow-indigo-200">
+            <span className="px-2.5 py-1 border border-ink text-ink caption rounded mb-1">
               AI Generated
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-5 text-slate-500 font-medium text-sm">
-            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-              <Calendar className="w-4 h-4 text-indigo-400" />
+          <div className="flex flex-wrap items-center gap-3 text-ink-secondary text-sm">
+            <div className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 rounded">
+              <Calendar className="w-3.5 h-3.5" />
               {days} Days
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-              <DollarSign className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 rounded">
+              <DollarSign className="w-3.5 h-3.5" />
               ${totalBudget?.toLocaleString()} Budget
             </div>
             {weatherInfo?.condition && (
-              <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                <CloudSun className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 rounded">
+                <CloudSun className="w-3.5 h-3.5" />
                 {weatherInfo.condition}
               </div>
             )}
@@ -117,55 +112,37 @@ const ItineraryPage = () => {
             <button
               onClick={handleSave}
               disabled={saved || saving}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm border transition-all duration-300 ${
-                saved
-                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200 cursor-default'
-                  : 'bg-white text-primary border-primary/20 hover:bg-indigo-50'
-              }`}
+              className="btn-primary"
             >
               {saved
-                ? <><CheckCircle className="w-4 h-4" /> Saved!</>
+                ? <><span className="status-dot bg-success" /> Saved</>
                 : saving
-                  ? <><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> Saving...</>
+                  ? <><Bookmark className="w-4 h-4" /> Saving...</>
                   : <><Bookmark className="w-4 h-4" /> Save Trip</>
               }
             </button>
 
             <button
               onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-5 py-2.5 btn-primary text-sm"
+              className="btn-secondary"
             >
               <Download className="w-4 h-4" />
               Download PDF
             </button>
           </div>
           {saveError && (
-            <p className="text-xs text-red-500 font-medium">{saveError}</p>
+            <p className="text-xs text-error">{saveError}</p>
           )}
         </div>
-      </motion.div>
+      </div>
 
-      {/* ── Summary Banner ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-white shadow-2xl shadow-indigo-300/40"
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-        <div className="relative z-10 flex items-start gap-4">
-          <div className="shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70 mb-2">AI Trip Summary</p>
-            <p className="text-lg md:text-xl leading-relaxed font-medium text-white/95 italic">
-              "{summary}"
-            </p>
-          </div>
-        </div>
-      </motion.section>
+      {/* ── Summary Pull Quote ── */}
+      <section className="card-lift rounded-lg p-8 md:p-10">
+        <p className="caption mb-3">AI Trip Summary</p>
+        <p className="pull-quote">
+          "{summary}"
+        </p>
+      </section>
 
       {/* ── Main Grid ── */}
       <div className="grid lg:grid-cols-3 gap-10">
@@ -173,55 +150,58 @@ const ItineraryPage = () => {
         {/* Left: Day-by-Day Itinerary */}
         <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-primary" />
+            <div className="w-8 h-8 border border-hairline rounded-md flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-ink" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Day-by-Day Journey</h2>
+            <h2 className="font-display text-h2 text-ink">Day-by-Day Journey</h2>
           </div>
 
-          <div className="space-y-6 relative before:absolute before:left-[17px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gradient-to-b before:from-indigo-200 before:via-purple-200 before:to-pink-200">
+          <div className="space-y-6 relative before:absolute before:left-[17px] before:top-4 before:bottom-4 before:w-px before:bg-hairline">
             {Array.isArray(itinerary) && itinerary.map((day, i) => (
               <ItineraryCard key={i} dayData={day} index={i} />
             ))}
           </div>
         </div>
 
-        {/* Right: Sidebar */}
-        <aside className="space-y-8 lg:sticky lg:top-10 h-fit">
-
+        {/* Right: Sidebar — quick-glance stats only, sticky against the day list */}
+        <aside className="space-y-8 lg:sticky lg:top-20 h-fit">
           <BudgetBreakdown breakdown={budgetBreakdown} />
           <WeatherInfo weather={weatherInfo} />
+        </aside>
+      </div>
 
-          {/* Packing + Tips */}
-          <div className="bg-slate-50/80 rounded-3xl border border-slate-100 overflow-hidden">
-            <p className="px-6 pt-5 pb-3 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-              Preparation & Insights
-            </p>
-            <PackingList items={packingList} />
-            <div className="mt-4">
-              <TravelTips tips={travelTips} />
-            </div>
+      {/* ── Trip Essentials — full-width, decoupled from the day-count-dependent column above ── */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 border border-hairline rounded-md flex items-center justify-center">
+            <Briefcase className="w-4 h-4 text-ink" />
           </div>
+          <h2 className="font-display text-h2 text-ink">Trip Essentials</h2>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+          <PackingList items={packingList} />
+          <TravelTips tips={travelTips} />
 
           {/* Local Food */}
           {Array.isArray(localFood) && localFood.length > 0 && (
-            <div className="modern-card bg-orange-50/60 border-orange-100/60">
+            <div className="card rounded-lg p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-200">
-                  <Utensils className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 border border-hairline rounded-md flex items-center justify-center">
+                  <Utensils className="w-4 h-4 text-ink" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Local Flavors</h2>
-                  <p className="text-xs text-orange-600 font-semibold uppercase tracking-wider">Culinary Gems</p>
+                  <h2 className="font-display text-h2 text-ink">Local Flavors</h2>
+                  <p className="caption">Culinary Gems</p>
                 </div>
               </div>
               <ul className="space-y-3">
                 {localFood.map((food, i) => (
-                  <li key={i} className="flex group gap-3 p-3 bg-white/80 rounded-2xl border border-orange-100/60 hover:border-orange-300 hover:shadow-sm transition-all">
-                    <span className="shrink-0 w-7 h-7 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                  <li key={i} className="flex gap-3 p-3 card-lift rounded-md">
+                    <span className="shrink-0 w-6 h-6 border border-hairline rounded-md text-ink-secondary flex items-center justify-center data-figure">
                       {i + 1}
                     </span>
-                    <span className="text-sm text-slate-700 leading-snug font-medium self-center">
+                    <span className="text-sm text-ink-secondary leading-snug self-center">
                       {typeof food === 'string' ? food : food.name}
                     </span>
                   </li>
@@ -232,23 +212,23 @@ const ItineraryPage = () => {
 
           {/* Hidden Gems */}
           {Array.isArray(lessCrowdedPlaces) && lessCrowdedPlaces.length > 0 && (
-            <div className="modern-card bg-emerald-50/60 border-emerald-100/60">
+            <div className="card rounded-lg p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-200">
-                  <Camera className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 border border-hairline rounded-md flex items-center justify-center">
+                  <Camera className="w-4 h-4 text-ink" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Hidden Gems</h2>
-                  <p className="text-xs text-emerald-600 font-semibold uppercase tracking-wider">Off-the-beaten-path</p>
+                  <h2 className="font-display text-h2 text-ink">Hidden Gems</h2>
+                  <p className="caption">Off-the-beaten-path</p>
                 </div>
               </div>
               <ul className="space-y-3">
                 {lessCrowdedPlaces.map((place, i) => (
-                  <li key={i} className="flex group gap-3 p-3 bg-white/80 rounded-2xl border border-emerald-100/60 hover:border-emerald-300 hover:shadow-sm transition-all">
-                    <span className="shrink-0 w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                  <li key={i} className="flex gap-3 p-3 card-lift rounded-md">
+                    <span className="shrink-0 w-6 h-6 border border-hairline rounded-md text-ink flex items-center justify-center text-xs">
                       ★
                     </span>
-                    <span className="text-sm text-slate-700 leading-snug font-medium self-center">
+                    <span className="text-sm text-ink-secondary leading-snug self-center">
                       {typeof place === 'string' ? place : place.name}
                     </span>
                   </li>
@@ -256,8 +236,8 @@ const ItineraryPage = () => {
               </ul>
             </div>
           )}
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

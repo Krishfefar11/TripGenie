@@ -1,26 +1,20 @@
 import React from 'react';
 import { Sunrise, Sun, Moon, DollarSign } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const ItineraryCard = ({ dayData, index }) => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="ml-10 relative bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
-    >
-      {/* Timeline Circle */}
-      <div className="absolute -left-[53px] top-6 w-9 h-9 bg-white border-[3px] border-primary rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/10 z-10 font-bold text-primary text-sm">
+    <div className="ml-10 relative card rounded-lg p-6 md:p-8">
+      {/* Timeline marker */}
+      <div className="absolute -left-[53px] top-6 w-9 h-9 bg-pearl border border-ink rounded-md flex items-center justify-center z-10 data-figure text-ink">
         {dayData.day}
       </div>
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-slate-900 underline decoration-indigo-200 underline-offset-8">
+          <h3 className="font-display text-h2 text-ink">
             {dayData.title}
           </h3>
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 text-slate-500 rounded-full text-sm font-semibold">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 border border-hairline text-ink-secondary rounded caption">
             <DollarSign className="w-3.5 h-3.5" />
             Est. ${dayData.estimatedCost}
           </div>
@@ -28,34 +22,34 @@ const ItineraryCard = ({ dayData, index }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-ink caption">
               <Sunrise className="w-4 h-4" /> Morning
             </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
+            <p className="text-body text-ink-secondary text-sm leading-relaxed">
               {dayData.morning}
             </p>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-ink caption">
               <Sun className="w-4 h-4" /> Afternoon
             </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
+            <p className="text-body text-ink-secondary text-sm leading-relaxed">
               {dayData.afternoon}
             </p>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-ink caption">
               <Moon className="w-4 h-4" /> Evening
             </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
+            <p className="text-body text-ink-secondary text-sm leading-relaxed">
               {dayData.evening}
             </p>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
