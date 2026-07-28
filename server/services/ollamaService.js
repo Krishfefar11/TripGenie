@@ -1,15 +1,25 @@
 /**
  * LLM Service
  *
- * Supports two backends (priority order):
- *  1. Groq API  — free cloud LLM (llama3-70b), used when GROQ_API_KEY is set
- *  2. Ollama    — local LLM, used when Groq key is absent and Ollama is running
- *  3. Mock      — structured fallback when neither is available
+ * Supports four backends (priority order):
+ *  1. Groq API   — free cloud LLM, used when GROQ_API_KEY is set
+ *  2. Gemini API — free cloud LLM (Google AI Studio), used when GROQ fails/absent
+ *                  and GEMINI_API_KEY is set. This is the real production
+ *                  fallback — unlike Ollama it works on a deployed server.
+ *  3. Ollama     — local LLM, only reachable in local dev; harmless to keep
+ *                  as a tertiary check since it fails fast when unreachable.
+ *  4. Mock       — structured fallback when nothing else is available.
  */
 
 const GROQ_API_URL   = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL     = process.env.GROQ_MODEL     || 'llama-3.3-70b-versatile';
+// llama-3.3-70b-versatile was deprecated by Groq (announced 2026-06-17,
+// decommissioned 2026-08) — openai/gpt-oss-120b is Groq's recommended replacement.
+const GROQ_MODEL     = process.env.GROQ_MODEL     || 'openai/gpt-oss-120b';
 const GROQ_API_KEY   = process.env.GROQ_API_KEY   || '';
+
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_MODEL   = process.env.GEMINI_MODEL   || 'gemini-flash-lite-latest';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 const OLLAMA_URL     = process.env.OLLAMA_URL     || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL   = process.env.OLLAMA_MODEL   || 'llama3:latest';
@@ -49,7 +59,104 @@ async function generateWithGroq(prompt, options = {}) {
 }
 
 // ─────────────────────────────────────────────
-// Ollama (local fallback)
+// Gemini (free cloud LLM — production fallback)
+// ─────────────────────────────────────────────
+
+/**
+ * Generate a response using Google's Gemini API (AI Studio free tier).
+ * @param {string} prompt
+ * @param {object} options
+ * @returns {string}
+ */
+async function generateWithGemini(prompt, options = {}) {
+  const model = options.model || GEMINI_MODEL;
+  const response = await fetch(
+    `${GEMINI_API_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          // Note: thinkingConfig is deliberately omitted. It worked earlier
+          // against gemini-flash-lite-latest, then started failing every
+          // request (even trivial ones) with 400 INVALID_ARGUMENT later the
+          // same day — "-latest" aliases can shift which model version they
+          // point to without notice, and the new one rejects this field.
+          // Omitting it is unconditionally safe; the field was a minor quota
+          // optimization, not a correctness requirement.
+          temperature: options.temperature || 0.7,
+          maxOutputTokens: options.maxTokens || 4096,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini API returned no content');
+  return text;
+}
+
+/**
+ * Generate a response from Gemini given a text prompt plus inline image/video data.
+ * Gemini is the only backend here with native multimodal understanding, so this
+ * bypasses the Groq-first fallback chain and always targets Gemini directly.
+ *
+ * @param {string} prompt
+ * @param {string} mediaBase64 - base64-encoded file contents (no data: prefix)
+ * @param {string} mimeType - e.g. 'image/jpeg', 'video/mp4'
+ * @param {object} options
+ * @returns {string}
+ */
+async function generateWithGeminiVision(prompt, mediaBase64, mimeType, options = {}) {
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured — media analysis requires Gemini');
+  }
+
+  const model = options.model || GEMINI_MODEL;
+  const response = await fetch(
+    `${GEMINI_API_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: mimeType, data: mediaBase64 } },
+          ],
+        }],
+        generationConfig: {
+          // Note: thinkingConfig is NOT included here — combining it with
+          // inline image/video data causes a 400 INVALID_ARGUMENT on
+          // gemini-flash-lite-latest (verified directly; text-only requests
+          // in generateWithGemini() are unaffected).
+          temperature: options.temperature || 0.4,
+          maxOutputTokens: options.maxTokens || 1024,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Gemini Vision API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini Vision API returned no content');
+  return text;
+}
+
+// ─────────────────────────────────────────────
+// Ollama (local dev only)
 // ─────────────────────────────────────────────
 
 async function isOllamaAvailable() {
@@ -82,19 +189,19 @@ async function generateWithOllamaLocal(prompt, options = {}) {
 }
 
 // ─────────────────────────────────────────────
-// Main entry point — tries Groq → Ollama → Mock
+// Main entry point — tries Groq → Gemini → Ollama → Mock
 // ─────────────────────────────────────────────
 
 /**
  * Generate a response using the best available LLM backend.
- * Priority: Groq API key → local Ollama → mock fallback.
+ * Priority: Groq → Gemini → local Ollama → mock fallback.
  *
  * @param {string} prompt
  * @param {object} options - { temperature, maxTokens, model }
  * @returns {string}
  */
 async function generateWithOllama(prompt, options = {}) {
-  // 1️⃣  Groq (free cloud LLM — preferred for deployed environments)
+  // 1️⃣  Groq (free cloud LLM — fastest, tried first)
   if (GROQ_API_KEY) {
     try {
       console.log(`🤖 Using Groq API (${GROQ_MODEL})`);
@@ -103,11 +210,24 @@ async function generateWithOllama(prompt, options = {}) {
       return result;
     } catch (err) {
       console.error('❌ Groq API failed:', err.message);
+      // fall through to Gemini
+    }
+  }
+
+  // 2️⃣  Gemini (free cloud LLM — real production fallback, works when deployed)
+  if (GEMINI_API_KEY) {
+    try {
+      console.log(`🤖 Using Gemini API (${GEMINI_MODEL})`);
+      const result = await generateWithGemini(prompt, options);
+      console.log('✅ Gemini response received');
+      return result;
+    } catch (err) {
+      console.error('❌ Gemini API failed:', err.message);
       // fall through to Ollama
     }
   }
 
-  // 2️⃣  Local Ollama
+  // 3️⃣  Local Ollama (dev convenience only — unreachable in production)
   const ollamaUp = await isOllamaAvailable();
   if (ollamaUp) {
     try {
@@ -119,7 +239,7 @@ async function generateWithOllama(prompt, options = {}) {
     }
   }
 
-  // 3️⃣  Mock fallback
+  // 4️⃣  Mock fallback
   console.log('⚠️  No LLM available — using mock response');
   return generateMockResponse(prompt);
 }
@@ -150,7 +270,7 @@ function generateMockResponse(prompt, errorMsg = 'No LLM configured') {
 
   return JSON.stringify({
     destination,
-    summary: `[DRAFT — No LLM configured] A ${days}-day overview for ${destination}. Add a GROQ_API_KEY to your .env to get real AI-generated itineraries.`,
+    summary: `[DRAFT — No LLM configured] A ${days}-day overview for ${destination}. Add a GROQ_API_KEY or GEMINI_API_KEY to your .env to get real AI-generated itineraries.`,
     itinerary,
     travelTips: [
       'Learn a few basic phrases in the local language',
@@ -186,4 +306,4 @@ function generateMockResponse(prompt, errorMsg = 'No LLM configured') {
   });
 }
 
-module.exports = { generateWithOllama, isOllamaAvailable };
+module.exports = { generateWithOllama, isOllamaAvailable, generateWithGeminiVision };

@@ -34,11 +34,13 @@ const documentRoutes  = require('./routes/documentRoutes');
 const itineraryRoutes = require('./routes/itineraryRoutes');
 const chatRoutes      = require('./routes/chatRoutes');
 const tripRoutes      = require('./routes/tripRoutes');
+const mediaRoutes     = require('./routes/mediaRoutes');
 
 app.use('/api', documentRoutes);
 app.use('/api', itineraryRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', tripRoutes);
+app.use('/api', mediaRoutes);
 
 // Root — useful health/info page
 app.get('/', (req, res) => {
@@ -47,7 +49,7 @@ app.get('/', (req, res) => {
     <div style="font-family:sans-serif;text-align:center;padding:50px;max-width:600px;margin:auto">
       <h1>🧞 TripGenie Backend</h1>
       <p>API is live on port <b>${port}</b>.</p>
-      <p>LLM backend: <b>${process.env.GROQ_API_KEY ? 'Groq ✅' : 'Mock (set GROQ_API_KEY for real AI)'}</b></p>
+      <p>LLM backend: <b>${process.env.GROQ_API_KEY ? 'Groq ✅' : process.env.GEMINI_API_KEY ? 'Gemini ✅' : 'Mock (set GROQ_API_KEY or GEMINI_API_KEY for real AI)'}</b></p>
       <p><a href="/api/health">/api/health</a></p>
     </div>
   `);
@@ -58,7 +60,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'TripGenie server is running 🧞',
-    llm: process.env.GROQ_API_KEY ? 'groq' : (process.env.OLLAMA_URL ? 'ollama' : 'mock'),
+    llm: process.env.GROQ_API_KEY ? 'groq' : process.env.GEMINI_API_KEY ? 'gemini' : (process.env.OLLAMA_URL ? 'ollama' : 'mock'),
   });
 });
 

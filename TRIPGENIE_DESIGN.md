@@ -1,167 +1,180 @@
-# TripGenie — Applied Design System
+# TripGenie — Applied Design System: Aurora
 
-This is not a design system spec — that's [`DESIGN.md`](DESIGN.md) ("Hôtel
-Rivière"), which remains the single source of truth for tokens and recipes.
-This file records **how that system was actually implemented** across
-TripGenie's real pages and components: where the tokens live in code, the
-concrete choices made where the base spec was silent, and a map of what
-changed file by file.
+This file records **how the current design system is actually implemented**
+across TripGenie's real pages and components — where the tokens live, the
+component vocabulary, the deliberate engineering calls, and what was verified.
 
-Written after implementation, not before — treat it as documentation of the
-current state, not a plan.
+Written after implementation. Documentation of current state, not a plan.
 
-> **History:** this is the third design system applied to the frontend this
-> session. First a custom liquid-glass/neumorphic system (discarded before
-> full rollout), then Devshell Mono (a developer-console aesthetic — wrong
-> fit for a consumer travel product, see the "why" below), now Hôtel
-> Rivière. If you're auditing old commits/screenshots, they may not match
-> what's live.
-
-## Why Devshell Mono got replaced
-
-Devshell Mono (monospace-everywhere, terminal chrome, single cyan accent)
-was evaluated honestly and rejected: it's tagged `[developer, minimal,
-modern, saas, premium]` in its own source — built for dev-tool branding, not
-travel. Monospace body copy hurt readability on itinerary prose, there was
-no visual language for destinations/imagery, and lowercase kebab-case nav
-labels (`plan-trip`, `ai-chat`) read as "for developers," not "plan my
-vacation." Hôtel Rivière fixes all four: proportional serif+sans pairing,
-warm palette, an accent used for genuine emphasis, and normal-cased human
-copy.
+> **History:** the frontend has been through several systems this session —
+> a liquid-glass/neumorphic experiment, "Devshell Mono" (developer-console
+> aesthetic), "Hôtel Rivière" (warm cream + serif editorial), and "Waypoint"
+> (clean forest-green-on-white, distilled from a Tripadvisor token dump).
+> **Aurora** is the current one: a full product-grade redesign aiming at the
+> Stripe/Linear/Vercel tier while keeping TripGenie's forest-green identity.
 
 ---
 
-## 1. Where the tokens live
+## 1. What changed from Waypoint
+
+Waypoint was clean but read as flat and under-designed — one accent per icon,
+plain white everywhere, no section rhythm, no footer, minimal motion. Aurora
+keeps the brand anchor (deep forest green, Inter, pill buttons) and rebuilds
+everything else:
+
+| Concern | Waypoint | Aurora |
+|---|---|---|
+| Color | 4 flat accents | 7 accents, each a **tonal ramp** (100→700) + 9 gradient presets |
+| Ink | `#002b11` | `#0a1f14` with a 4-step ramp (`ink` / `soft` / `muted` / `faint`) |
+| Type scale | 10 sizes, fixed | 13 roles, `clamp()`-fluid, weights baked into tokens |
+| Shadows | 2 | 8-step layered scale, **tinted green** rather than neutral black, plus 4 colored glows |
+| Section bgs | all white | mesh gradient, tint, blueprint grid, dot grid, film-grain noise, dark bands |
+| Motion | none | scroll reveals, stagger, float, sheen, pulse rings, bar grow, spring easing |
+| Footer | none | full footer: CTA row, brand blurb, link columns, socials, status bar |
+| Homepage | hero + form + 3 cards | hero w/ product preview, form, **bento grid**, dark pipeline timeline, sample-output showcase, testimonials, CTA band |
+
+---
+
+## 2. Where things live
 
 | Concern | File |
 |---|---|
-| Color / font / radius / spacing tokens | `client/tailwind.config.js` |
-| Component classes (buttons, cards, labels) | `client/src/index.css` |
-| Font `<link>` (Cormorant Infant, Inter, JetBrains Mono) | `client/index.html` |
+| Color / type / radius / shadow / gradient / motion tokens | `client/tailwind.config.js` |
+| Component recipes, surfaces, backgrounds, reveal CSS | `client/src/index.css` |
+| Fonts (Inter + JetBrains Mono) | `client/index.html` |
+| Scroll-reveal primitives | `client/src/components/ui/Reveal.jsx` |
+| Icon containers | `client/src/components/ui/IconBadge.jsx` |
+| Section header | `client/src/components/ui/SectionHeading.jsx` |
+| Scroll progress bar | `client/src/components/ui/ScrollProgress.jsx` |
+| Footer | `client/src/components/Footer.jsx` |
+| `cn()` class merge helper | `client/src/utils/cn.js` |
 
-### Component classes available for future work
+### Component vocabulary
 
-| Class | Use |
-|---|---|
-| `.btn-primary` / `.btn-secondary` / `.btn-outline` / `.btn-ghost` | The four button variants, exact padding/uppercase/tracking from DESIGN.md §4 |
-| `.card` | Default hairline card — bg pearl, 1px hairline, hover border → ink |
-| `.card-lift` | Secondary surface — bg `pearl-lift`, same hairline |
-| `.card-suite` | Pearl-lift + 3px ink top border ("the only chrome") — used for saved-trip cards, the closest thing to a "suite card" in this app |
-| `.caption` | Mono uppercase 11px, `ink-secondary` — eyebrows, metadata, stat labels |
-| `.data-figure` | Mono uppercase 14px tabular-nums — costs, day counts, day-marker numerals |
-| `.pull-quote` | Cormorant Infant italic, 28px — AI summary text and travel tips |
-| `.status-dot` | Small filled circle for semantic-color status use |
-
-Tailwind additions worth knowing: `text-hero` / `text-hero-sm`, `text-h1` /
-`text-h1-sm`, `text-h2`, `text-quote`, `text-body`, `text-ui`, `text-caption`,
-`text-data` (exact size/leading/tracking from DESIGN.md §3), and
-`font-display` / `font-sans` / `font-mono` for the three families.
-
-**One deviation from the literal spec, flagged per its own "ask before
-adding" rule:** the source hero/H1 sizes (`8rem` / `4.5rem`) are desktop-only
-values with no mobile counterpart declared. Added `hero-sm` (3.25rem) and
-`h1-sm` (2.75rem) as responsive companions, applied at the base breakpoint
-with the full-size token taking over at `md:`. This mirrors the system's own
-established pattern of desktop/mobile pairs (see: "Section padding: 200px
-desktop, 96px mobile") rather than inventing an unrelated value.
-
-A legacy `primary` color alias points at sage for backward compatibility;
-no component actually uses `text-primary` / `bg-primary` — everything uses
-`.btn-primary` or `text-sage` directly (verified via grep across `client/src`).
+`.btn-primary` / `.btn-dark` / `.btn-secondary` / `.btn-ghost` / `.btn-glass`
+(+ `.btn-sm` / `.btn-lg`) · `.card` / `.card-hover` / `.card-sunken` /
+`.card-gradient` · `.glass` / `.glass-dark` · `.bg-mesh` / `.bg-mesh-soft` /
+`.bg-tint` / `.bg-grid` / `.bg-dots` / `.bg-noise` / `.bg-ink-deep` · `.orb` ·
+`.text-gradient` / `.text-gradient-vivid` · `.input` / `.chip` / `.pill` ·
+`.eyebrow` / `.label-form` / `.caption-meta` / `.stat-num` / `.data-num` /
+`.pull-quote` · `.icon-box` / `.status-dot` / `.rule` / `.sheen-wrap`
 
 ---
 
-## 2. Page-by-page
+## 3. Engineering decisions worth knowing
 
-**Navbar** — Flat pearl bar, bottom hairline, sticky. Logo is an ink square +
-Compass icon, wordmark in Cormorant Infant (per "Display... brand
-wordmarks"). Tabs follow the literal Tabs recipe in DESIGN.md §7: the active
-label doesn't change color, it switches font — from Inter uppercase to
-Cormorant Infant italic at the same visual weight. That's the one most
-distinctive, most literally-followed detail in this implementation.
+### Above-the-fold content never depends on JavaScript to become visible
 
-**HomePage** — Hero headline is the "Suite Name" moment applied to the
-brand: Cormorant Infant at (responsive) hero scale, no color, no gradient.
-Eyebrow above it is a plain `.caption`, not a bordered badge — matching the
-system's general lack of pill/badge chrome. Feature cards are `.card`s with
-ink-only icons (never sage — sage is reserved, see below).
+The hero originally used Framer Motion's `initial={{opacity: 0}}` → `animate`.
+That writes `opacity: 0` inline on mount and relies on `requestAnimationFrame`
+to walk it back up. **If rAF is throttled — a backgrounded tab, a busy main
+thread, a script that fails mid-flight — the hero is stranded invisible.**
 
-**TripForm** — One `.card`, hairline inputs (`hover:border-ink/40`,
-`focus:border-ink` + 5% ink wash). The submit button, "Generate Itinerary,"
-is the **one sage-olive CTA on this page** — the direct analog of the
-system's "Reserve" button.
+This was not hypothetical: it reproduced immediately in a backgrounded tab
+(`document.hidden === true`, **0 rAF callbacks in 500ms**, hero frozen at
+`opacity: 0.0215`).
 
-**ItineraryPage** — The destination name (`Lisbon, Portugal`, etc.) renders
-as an H1 in Cormorant Infant — this is the single best content/system fit in
-the whole app: a large-format place-name in a soft-didone serif is *exactly*
-what "Suite Name" typography was designed for, just applied to a destination
-instead of a hotel room. The AI-generated summary uses `.pull-quote` inside
-a `card-lift` panel — a direct, literal use of the system's declared Pull
-Quote role ("reserved for... pull quotes"). "Save Trip" gets `.btn-primary`
-(sage) as this page's one reservation-equivalent gesture; "Download PDF" is
-`.btn-secondary` (ink outline).
+The hero now uses CSS keyframe animations with `animation-fill-mode: both`,
+staggered via `animationDelay`. The browser owns the timeline; there is no JS
+in the path to visibility.
 
-**ItineraryCard** — Day marker is a bordered square with the day number in
-`.data-figure` (mono tabular numerals, matching the system's "Room Number"
-token intent). Morning/afternoon/evening labels use `.caption`.
+### Scroll reveals are IntersectionObserver + CSS, not a JS animation loop
 
-**BudgetBreakdown** — See §3, same single-highlight interpretation carried
-over from the previous system, now in sage instead of cyan. Category icons
-via `lucide-react`, no emoji (hard constraint, unchanged requirement).
+`Reveal` / `Stagger` set a `data-reveal` attribute; an observer flips
+`data-revealed`; **both the hidden and visible states are declarative CSS**
+(see the reveal block in `index.css`). The observer only toggles an attribute —
+it never interpolates values. Worst case the transition doesn't paint and the
+content simply appears.
 
-**WeatherInfo / PackingList** — Standard `.card` / `.card-lift`. No accent
-color used at all here — intentional, since sage stays reserved for the
-per-page CTA and these components carry no "commitment" gesture.
+Three safety nets, because content stuck at `opacity: 0` is the worst possible
+failure mode:
+1. **No `IntersectionObserver` support** → reveal immediately.
+2. **Synchronous in-viewport check on mount** → anything already on screen
+   reveals without waiting for an observer callback (which a hidden tab
+   suspends).
+3. **`visibilitychange` re-check** → a tab restored from the background
+   re-evaluates, so nothing stays stranded after scrolling while suspended.
 
-**TravelTips** — Each tip renders in `.pull-quote` — turns generic advice
-strings into something that reads like the "chef's signature note" the
-system describes, rather than a bulleted list.
+Stagger delays come from CSS `nth-child` rules, so there's no per-item JS.
 
-**ChatInterface / ChatPage** — User bubble: ink bg, pearl text. Assistant
-bubble: `pearl-lift` + hairline. The chat send button is deliberately **ink,
-not sage** — see §3, sending a message isn't treated as a reservation-grade
-action.
+### Progress bars carry their real value in the DOM
 
-**SavedTripsPage** — Cards use `.card-suite` (the 3px ink top border) since
-these literally are the user's saved "reservations." The heart icon is ink,
-not sage — kept in reserve for the empty-state "Start Planning" button,
-which is that page's one CTA.
+Budget bars set `width` to the true percentage and animate with a CSS
+`scaleX` keyframe. A stalled animation shows a **correct bar**, never an empty
+track — which is what a JS width-interpolation would have left behind.
 
----
+### Icon color means something
 
-## 3. Interpretations — where DESIGN.md didn't specify
+`IconBadge` has `gradient` (feature-level: solid gradient, white glyph, colored
+glow) and `tint` (inline: 12% wash, solid glyph). Accents are assigned when an
+icon **distinguishes one sibling from another** — budget categories, bento
+tiles, pipeline steps, time-of-day blocks. Generic container headers stay
+neutral. Recoloring a one-off header icon is decoration, not signal.
 
-DESIGN.md's own instructions say: *"If a value is missing, ask the user
-before adding one."* These are the calls made without a literal spec value:
+`BudgetBreakdown`'s "Miscellaneous" row is deliberately neutral gray: it's the
+unranked catch-all and shouldn't compete. The top category is marked with both
+a `TOP` chip **and** full opacity — never hue alone.
 
-- **"One sage-olive button per page."** The source system built this around
-  a single hotel-booking flow with one obvious Reserve action. TripGenie has
-  several pages, each with its own candidate CTA. Resolved by picking the
-  one genuine commitment action per page: **Generate Itinerary** (Home),
-  **Save Trip** (Itinerary), **Start Planning** (Saved Trips empty state).
-  Everything else — downloads, deletes, chat send, nav — stays ink/outline.
-  This required judgment the source file doesn't cover explicitly, but it's
-  a direct extension of "one booking, one color."
+### Accessibility
 
-- **Budget chart highlighting.** Same interpretation as the previous system:
-  `highlight: single` in the chart tokens is applied by coloring only the
-  largest-spend category's bar in sage; the rest render at `bg-ink/18`.
+- Global `*:focus-visible` ring (2px, 2px offset) — keyboard only, never on
+  pointer click.
+- `prefers-reduced-motion` is honored in **CSS**, so it applies to every
+  animation path including the reveal system.
+- Saved-trip cards are `role="button"` + `tabIndex={0}` + Enter/Space handlers.
+  Verified: focus ring visible, `Enter` navigates.
+- Form controls have real `<label htmlFor>`, steppers have `aria-label`,
+  toggles have `aria-pressed`, the chat log is `role="log" aria-live="polite"`,
+  errors are `role="alert"`, decorative icons are `aria-hidden`.
 
-- **Chat send button color.** Not specified. Kept ink rather than sage,
-  reasoning that a frequently-repeated, low-stakes action (sending a chat
-  message) shouldn't carry the same "stamped reservation seal" weight the
-  system explicitly reserves for singular commitments.
+### Interactions that now do something
 
-- **Responsive hero/H1 sizes.** Covered in §1 above — added `hero-sm`/`h1-sm`
-  companions rather than shipping an unreadable 8rem headline on mobile.
+- **PackingList** items are genuinely checkable with a progress bar. Previously
+  the checkmark appeared on hover and tracked nothing — a packing list you
+  can't tick off is decoration.
+- **MediaUpload** accepts real drag-and-drop with a distinct dragging state,
+  and revokes its object URLs.
+- **TripForm** has a chip-based interest picker, a day stepper, and budget
+  presets. Chips and the free-text field merge (de-duplicated) into the same
+  `interests` string the API already expected — no backend change.
+- **ChatInterface** textarea auto-grows to a 140px ceiling.
 
 ---
 
 ## 4. Verification
 
-Ran the full user flow after implementation: home → fill trip form → submit
-→ real Groq-generated itinerary for Lisbon, Portugal on `/itinerary` → chat
-page → saved trips (empty state). Screenshots taken at each step. No
-leftover references to Devshell Mono's classes (`text-cyan`, `.shell-card`,
-`.comment`, `font-jakarta`, etc.) anywhere in `client/src` (checked via grep
-across all `.jsx` files).
+Restarted Vite (Tailwind's JIT does not reliably pick up config-only changes on
+hot reload in this project — a recurring issue across every redesign here).
+
+- **Desktop 1440**, **mobile 375**, and full-page captures of Home, Itinerary,
+  Chat, Saved Trips.
+- **Real end-to-end generation** (Tokyo, 3 days, $1000, "Food" chip). Server
+  logs confirm the full path: hybrid search fused 15 candidates → cross-encoder
+  reranked to top 5 → Groq generated. The chip merge reached the retrieval
+  query as `"Tokyo Food Plan a 3-day trip to Tokyo"`, and the page rendered 3
+  day cards with genuinely retrieved Tokyo specifics (Senso-ji, Tsukiji,
+  TeamLab Planets, Ichiran).
+- **Keyboard**: saved-trip card `Enter` → navigates to `/itinerary`.
+- **Console**: zero errors.
+- **`vite build`**: passes (446 kB JS / 141 kB gzip, 57 kB CSS / 11 kB gzip).
+
+### Bugs found and fixed during verification
+
+- **Day-number timeline nodes were invisible** — `overflow-hidden` on
+  `ItineraryCard` clipped the node positioned outside the card's box.
+- **Hero frozen invisible** in a throttled tab — root cause above.
+- **Floating hero badges overlapped card body copy** — re-anchored to the
+  card's outer corners and gated to `xl:`.
+- **Hero headline wrapped awkwardly** ("Travel plans / that") — reduced the
+  `hero` clamp ceiling from `5rem` to `3.875rem`.
+- **Duplicate padding** in the saved-trip card footer row.
+- **Excess dead space** above the footer (`mt-24` on top of section padding).
+
+### Known cosmetic notes
+
+- Bento tiles in the second row stretch to equal height, leaving some bottom
+  whitespace when copy is short. Intentional for grid alignment.
+- A saved trip persisted before this work has an empty `summary`, so its
+  summary panel renders empty quotes. Pre-existing data shape issue in what
+  gets persisted on save — **not** introduced by this redesign, and not fixed
+  here since it's a backend/persistence concern rather than a design one.

@@ -15,6 +15,10 @@ services:
       - key: GROQ_API_KEY
         sync: false          # paste your Groq key in the Render dashboard
       - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
+      - key: GEMINI_API_KEY
+        sync: false          # paste your Gemini key in the Render dashboard — https://aistudio.google.com/apikey
+      - key: GEMINI_MODEL
+        value: gemini-flash-lite-latest
       - key: FRONTEND_URL
         sync: false          # paste your Vercel URL e.g. https://trip-genie.vercel.app

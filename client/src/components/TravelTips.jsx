@@ -1,29 +1,34 @@
 import React from 'react';
-import { Lightbulb, Info } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
+import IconBadge from './ui/IconBadge';
 
 const TravelTips = ({ tips }) => {
   if (!tips || tips.length === 0) return null;
 
   return (
-    <div className="card rounded-lg p-6">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-8 h-8 border border-hairline rounded-md flex items-center justify-center">
-          <Lightbulb className="w-4 h-4 text-ink" />
+    <section className="card flex h-full flex-col p-6" aria-label="Travel tips">
+      <div className="flex items-center gap-3">
+        <IconBadge icon={Lightbulb} accent="violet" size="sm" />
+        <div>
+          <h2 className="text-h3 text-ink">Travel Tips</h2>
+          <p className="caption-meta mt-0.5">Know before you go</p>
         </div>
-        <h2 className="font-display text-h2 text-ink">Expert Travel Tips</h2>
       </div>
 
-      <div className="space-y-3">
+      <ul className="mt-4 space-y-2.5">
         {tips.map((tip, i) => (
-          <div key={i} className="flex gap-3 p-4 card-lift rounded-md">
-            <Info className="w-3.5 h-3.5 text-ink-secondary shrink-0 mt-1" />
-            <p className="pull-quote text-lg leading-snug">
-              {tip}
-            </p>
-          </div>
+          <li
+            key={i}
+            className="flex gap-3 rounded-md border border-line bg-surface-sunken p-3.5"
+          >
+            <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-pill bg-violet-500/14 text-[0.5625rem] font-bold text-violet-700">
+              {i + 1}
+            </span>
+            <p className="text-tiny leading-relaxed text-ink-soft">{tip}</p>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 };
 

@@ -14,7 +14,7 @@ const { generateItinerary } = require('../services/ragPipeline');
  */
 async function generateItineraryHandler(req, res) {
   try {
-    const { destination, budget, days, interests, query } = req.body;
+    const { destination, budget, days, interests, query, mediaContext } = req.body;
 
     // Validate required fields
     if (!destination) {
@@ -34,6 +34,7 @@ async function generateItineraryHandler(req, res) {
       days: Number(days),
       interests: Array.isArray(interests) ? interests : interests?.split(',').map((s) => s.trim()) || [],
       query: query || `Plan a ${days}-day trip to ${destination}`,
+      mediaContext: mediaContext || undefined,
     });
 
     res.json({

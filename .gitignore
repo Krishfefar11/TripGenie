@@ -11,6 +11,11 @@ uploads/*
 .agents/
 brain/
 /tmp/
+.claude/worktrees/
+.claude/settings.local.json
+server/eng.traineddata
+server/uploads/*
+!server/uploads/.gitkeep
 
 # Keep example files in git
 !.env.example

@@ -1,87 +1,451 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Sparkles, ArrowRight, ArrowUpRight, Database, Layers, Wallet, MessageSquare,
+  ImagePlus, Search, Star, Clock, MapPin, Sunrise, Sun, Moon,
+  ShieldCheck, Zap, FileText, CheckCircle2, Utensils, TrendingUp,
+} from 'lucide-react';
 import TripForm from '../components/TripForm';
-import { Zap, Shield, MessageSquare, ArrowUpRight } from 'lucide-react';
+import { Reveal, Stagger, StaggerItem } from '../components/ui/Reveal';
+import SectionHeading from '../components/ui/SectionHeading';
+import IconBadge from '../components/ui/IconBadge';
 
-const FEATURES = [
+/* ── Content ─────────────────────────────────────────────────────────── */
+
+const TRUST_STATS = [
+  { value: '6', label: 'Destination guides indexed' },
+  { value: '384-d', label: 'Local embedding vectors' },
+  { value: '0.97', label: 'Retrieval MRR@5' },
+  { value: '4', label: 'LLM fallback layers' },
+];
+
+const HOW_STEPS = [
   {
-    title: 'Smart RAG Intelligence',
-    desc: 'Retrieves information from real travel guides and documents, so every recommendation is grounded in genuine knowledge.',
-    icon: Zap,
+    n: '01', accent: 'brand', icon: FileText,
+    title: 'Ingest & chunk',
+    body: 'Real destination guides are split into overlapping ~250-word passages so no fact gets cut mid-sentence.',
   },
   {
-    title: 'Budget Optimizer',
-    desc: 'Every itinerary is precision-crafted within your financial limits, with per-category cost breakdowns for full transparency.',
-    icon: Shield,
+    n: '02', accent: 'indigo', icon: Search,
+    title: 'Hybrid retrieve',
+    body: 'BM25 keyword search runs alongside vector similarity, then Reciprocal Rank Fusion merges both rankings.',
   },
   {
-    title: 'Contextual AI Chat',
-    desc: 'Follow up with our travel assistant at any time — modify plans, ask for tips, or explore hidden gems by simply chatting.',
-    icon: MessageSquare,
+    n: '03', accent: 'violet', icon: Layers,
+    title: 'Cross-encoder rerank',
+    body: 'A local cross-encoder rescores every candidate against your query, lifting the best passage to the top.',
+  },
+  {
+    n: '04', accent: 'amber', icon: Sparkles,
+    title: 'Ground & generate',
+    body: 'Retrieved passages are injected into the prompt, so the itinerary cites real places — not hallucinations.',
   },
 ];
 
-const HomePage = () => {
+const SAMPLE_DAY = [
+  { part: 'Morning',   icon: Sunrise, tint: 'amber',  text: 'Timed-entry combo ticket to the Colosseum and Roman Forum (Via dei Fori Imperiali).' },
+  { part: 'Afternoon', icon: Sun,     tint: 'sky',    text: 'Aventine Hill keyhole view of St. Peter’s dome at the Priory of the Knights of Malta.' },
+  { part: 'Evening',   icon: Moon,    tint: 'violet', text: 'Porchetta sandwich at the Trastevere night-market food stalls (Piazza di Santa Maria).' },
+];
+
+/* ── Hero visual: a floating itinerary preview card ───────────────────── */
+
+const HeroPreview = () => {
   return (
-    <div className="max-w-5xl mx-auto space-y-24 md:space-y-[128px] py-16 md:py-24">
+    <div className="relative mx-auto w-full max-w-[430px] lg:max-w-none">
+      {/* Glow behind the card */}
+      <div className="orb -right-8 -top-10 h-56 w-56 bg-brand-400/26" aria-hidden="true" />
+      <div className="orb -bottom-12 -left-10 h-56 w-56 bg-indigo-500/20" aria-hidden="true" />
 
-      {/* ── Hero Section ── */}
-      <section className="text-center space-y-8 px-4">
-        <p className="caption">Next-Gen AI Travel Planning</p>
-
-        <h1 className="font-display text-hero-sm md:text-hero text-ink">
-          Your Personal<br />Travel Architect
-        </h1>
-
-        <p className="text-body text-ink-secondary max-w-2xl mx-auto">
-          TripGenie uses advanced Retrieval-Augmented Generation to craft deeply personalised
-          travel itineraries from real-world data and your unique preferences.
-        </p>
-
-        {/* Stats row */}
-        <div className="flex flex-wrap justify-center gap-4 pt-4">
-          {[
-            { value: '50+', label: 'Destinations' },
-            { value: 'RAG', label: 'Powered' },
-            { value: '100%', label: 'Personalised' },
-          ].map((stat, i) => (
-            <div key={i} className="card-lift rounded-lg px-8 py-5 min-w-[130px]">
-              <div className="data-figure text-ink text-lg">{stat.value}</div>
-              <div className="caption mt-1">{stat.label}</div>
+      <div
+        className="card-gradient relative animate-fade-up overflow-hidden rounded-xl p-5 sm:p-6"
+        style={{ animationDelay: '280ms' }}
+      >
+        {/* Window chrome */}
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <IconBadge icon={MapPin} accent="brand" size="sm" />
+            <div>
+              <p className="text-h3 leading-tight text-ink">Rome, Italy</p>
+              <p className="caption-meta mt-0.5">3 days · $1,000</p>
             </div>
-          ))}
+          </div>
+          <span className="pill border-brand-500/20 bg-brand-500/10 text-brand-700">
+            <span className="status-dot bg-brand-500" aria-hidden="true" />
+            AI Generated
+          </span>
         </div>
-      </section>
 
-      {/* ── Trip Planning Form ── */}
-      <section className="px-4">
-        <TripForm />
-      </section>
+        {/* Day 1 timeline */}
+        <div className="card-sunken rounded-md p-4">
+          <div className="mb-3.5 flex items-center justify-between">
+            <span className="inline-flex items-center gap-2 text-tiny font-semibold text-ink">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-xs bg-grad-brand text-[0.625rem] font-bold text-white">
+                1
+              </span>
+              Imperial Foundations
+            </span>
+            <span className="data-num text-caption text-ink-muted">EST. $17</span>
+          </div>
 
-      {/* ── Features Grid ── */}
-      <section className="px-4 pb-8">
-        <div className="text-center mb-12">
-          <h2 className="font-display text-h2 text-ink mb-3">Why TripGenie?</h2>
-          <p className="text-body text-ink-secondary max-w-xl mx-auto">
-            Built on cutting-edge AI, it goes beyond generic itineraries to deliver travel plans that actually fit you.
+          <ul className="space-y-3">
+            {SAMPLE_DAY.map(({ part, icon: Icon, tint, text }, i) => (
+              <li
+                key={part}
+                className="flex animate-fade-up gap-2.5"
+                style={{ animationDelay: `${420 + i * 110}ms` }}
+              >
+                <IconBadge icon={Icon} accent={tint} variant="tint" size="xs" lift={false} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-caption uppercase text-ink-muted">{part}</p>
+                  <p className="mt-0.5 text-tiny leading-relaxed text-ink-soft">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Retrieval provenance — the RAG proof, shown not told */}
+        <div className="mt-4 flex items-center gap-2 rounded-md border border-indigo-500/16 bg-indigo-500/[0.055] px-3 py-2.5">
+          <Database className="h-3.5 w-3.5 shrink-0 text-indigo-600" aria-hidden="true" />
+          <p className="text-caption leading-snug text-ink-soft">
+            Grounded in <span className="font-semibold text-indigo-700">5 retrieved passages</span> from
+            {' '}<span className="font-mono text-[0.6875rem]">rome-guide.txt</span>
           </p>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          {FEATURES.map((feat, i) => (
-            <div key={i} className="card rounded-lg p-7">
-              <div className="w-9 h-9 border border-hairline rounded-md flex items-center justify-center mb-5">
-                <feat.icon className="w-4 h-4 text-ink" />
+      {/* Floating feature badges — depth cue around the card. Anchored to the
+          card's outer corners so they straddle the edge without landing on
+          body copy. The float animation is decorative; the badges stay visible. */}
+      <div className="absolute -left-7 -top-4 hidden animate-float xl:block">
+        <div className="glass flex items-center gap-2 rounded-pill px-3 py-2 shadow-lg">
+          <ImagePlus className="h-3.5 w-3.5 text-violet-600" aria-hidden="true" />
+          <span className="text-caption font-semibold text-ink">Photo → Itinerary</span>
+        </div>
+      </div>
+
+      <div className="absolute -bottom-4 -right-7 hidden animate-float-slow xl:block">
+        <div className="glass flex items-center gap-2 rounded-pill px-3 py-2 shadow-lg">
+          <Wallet className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+          <span className="text-caption font-semibold text-ink">Budget aware</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Page ────────────────────────────────────────────────────────────── */
+
+const HomePage = () => {
+  return (
+    <div className="overflow-x-clip">
+
+      {/* ═══════════════ HERO ═══════════════ */}
+      <section className="relative isolate overflow-hidden bg-mesh">
+        <div className="absolute inset-0 bg-grid" aria-hidden="true" />
+
+        <div className="relative mx-auto max-w-shell px-5 pb-20 pt-14 sm:px-8 sm:pt-20 lg:pb-28 lg:pt-24">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.03fr_0.97fr] lg:gap-12">
+
+            {/* ── Copy column ──
+                Above-the-fold content animates via CSS, not JS. A hero that
+                needs JavaScript to become visible is a hero that renders blank
+                whenever rAF is throttled or a script fails. */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex animate-fade-up items-center gap-2 rounded-pill border border-brand-500/18 bg-white/70 py-1.5 pl-1.5 pr-3.5 shadow-xs backdrop-blur">
+                <span className="inline-flex items-center gap-1 rounded-pill bg-grad-brand px-2 py-0.5 text-caption font-bold text-white">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  RAG
+                </span>
+                <span className="text-caption font-semibold text-ink-soft">
+                  Hybrid retrieval + cross-encoder reranking
+                </span>
               </div>
 
-              <h3 className="font-display text-h2 text-ink mb-2">{feat.title}</h3>
-              <p className="text-body text-ink-secondary text-sm leading-relaxed">{feat.desc}</p>
+              <h1
+                className="mt-6 animate-fade-up text-hero text-ink text-balance"
+                style={{ animationDelay: '80ms' }}
+              >
+                Travel plans that<br className="hidden sm:block" />{' '}
+                <span className="text-gradient-vivid">cite their sources</span>
+              </h1>
 
-              <div className="mt-5 inline-flex items-center gap-1 text-ui uppercase text-ink-secondary hover:text-ink transition-colors duration-base">
-                Explore
-                <ArrowUpRight className="w-3.5 h-3.5" />
+              <p
+                className="mx-auto mt-5 max-w-xl animate-fade-up text-lead text-ink-soft lg:mx-0"
+                style={{ animationDelay: '160ms' }}
+              >
+                Most AI planners guess. TripGenie retrieves real passages from real
+                destination guides, reranks them for relevance, then writes a
+                day-by-day itinerary that fits your budget — and shows you what it read.
+              </p>
+
+              <div
+                className="mt-8 flex animate-fade-up flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
+                style={{ animationDelay: '240ms' }}
+              >
+                <a href="#plan" className="btn-primary btn-lg">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Plan my trip — free
+                  <ArrowRight className="btn-arrow h-4 w-4" aria-hidden="true" />
+                </a>
+                <Link to="/chat" className="btn-secondary btn-lg">
+                  <MessageSquare className="h-4 w-4" aria-hidden="true" />
+                  Ask the assistant
+                </Link>
+              </div>
+
+              {/* Trust indicators */}
+              <div
+                className="mt-8 flex animate-fade-up flex-wrap items-center justify-center gap-x-5 gap-y-2.5 lg:justify-start"
+                style={{ animationDelay: '330ms' }}
+              >
+                {[
+                  { icon: CheckCircle2, text: 'No signup required' },
+                  { icon: ShieldCheck,  text: 'Local embeddings' },
+                  { icon: Zap,          text: 'Under 60s' },
+                ].map(({ icon: Icon, text }) => (
+                  <span key={text} className="inline-flex items-center gap-1.5 text-caption font-medium text-ink-muted">
+                    <Icon className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
+                    {text}
+                  </span>
+                ))}
               </div>
             </div>
-          ))}
+
+            {/* ── Visual column ── */}
+            <div className="relative lg:pl-4">
+              <HeroPreview />
+            </div>
+          </div>
+        </div>
+
+        {/* Stat strip — seals the hero, bridges into the next band */}
+        <div className="relative border-y border-line bg-white/55 backdrop-blur-sm">
+          <div className="mx-auto max-w-shell px-5 sm:px-8">
+            <Stagger className="grid grid-cols-2 divide-line md:grid-cols-4 md:divide-x" gap={0.07}>
+              {TRUST_STATS.map((s) => (
+                <StaggerItem key={s.label} className="px-2 py-6 text-center md:px-6 md:py-7">
+                  <p className="stat-num">{s.value}</p>
+                  <p className="mt-1.5 text-caption uppercase leading-snug text-ink-muted">{s.label}</p>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ PLAN FORM ═══════════════ */}
+      <section id="plan" className="relative scroll-mt-24 bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-shell px-5 sm:px-8">
+          <SectionHeading
+            eyebrow="Start here"
+            eyebrowIcon={Sparkles}
+            title="Tell us where you're going"
+            lead="Four fields, or upload a photo and let the vision model work out the destination for you."
+            className="mb-12"
+          />
+          <Reveal direction="up" delay={0.08}>
+            <TripForm />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════ HOW IT WORKS — TIMELINE ═══════════════ */}
+      <section id="how-it-works" className="relative scroll-mt-24 overflow-hidden bg-ink-deep bg-noise py-20 text-white sm:py-24">
+        <div className="orb -left-20 top-10 h-80 w-80 bg-brand-500/16" aria-hidden="true" />
+        <div className="orb -right-20 bottom-10 h-80 w-80 bg-indigo-500/14" aria-hidden="true" />
+
+        <div className="relative mx-auto max-w-shell px-5 sm:px-8">
+          <div className="mb-14 flex flex-col items-center gap-4 text-center">
+            <Reveal>
+              <span className="eyebrow rounded-pill border border-white/14 bg-white/[0.07] px-3 py-1.5 text-white/72">
+                <Database className="h-3.5 w-3.5" aria-hidden="true" />
+                The pipeline
+              </span>
+            </Reveal>
+            <Reveal delay={0.06}>
+              <h2 className="text-display text-white text-balance">Four stages, no magic</h2>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <p className="max-w-2xl text-lead text-white/58">
+                This is the whole retrieval-augmented generation flow — the same one
+                you could walk an interviewer through, line by line.
+              </p>
+            </Reveal>
+          </div>
+
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5" gap={0.1}>
+            {HOW_STEPS.map((step, i) => (
+              <StaggerItem key={step.n}>
+                <div className="group relative h-full rounded-lg border border-white/10 bg-white/[0.045] p-6 transition-all duration-slow hover:-translate-y-1 hover:border-white/22 hover:bg-white/[0.075]">
+                  {/* Connector line between steps on desktop */}
+                  {i < HOW_STEPS.length - 1 && (
+                    <span
+                      className="absolute -right-2.5 top-11 hidden h-px w-5 bg-gradient-to-r from-white/22 to-transparent lg:block"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <div className="flex items-center justify-between">
+                    <IconBadge icon={step.icon} accent={step.accent} size="md" />
+                    <span className="font-mono text-[0.6875rem] font-medium text-white/28">{step.n}</span>
+                  </div>
+                  <h3 className="mt-5 text-h3 text-white">{step.title}</h3>
+                  <p className="mt-2 text-small leading-relaxed text-white/58">{step.body}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* ═══════════════ SAMPLE OUTPUT — SHOW, DON'T TELL ═══════════════ */}
+      <section className="relative overflow-hidden bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-shell px-5 sm:px-8">
+          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+
+            <div>
+              <SectionHeading
+                align="left"
+                eyebrow="Real output"
+                eyebrowIcon={FileText}
+                title="What you actually get back"
+                lead="Not a wall of prose. A structured plan with costs, packing, local dishes, and the quiet spots most guides skip."
+                titleClass="text-display"
+              />
+
+              <Stagger className="mt-9 space-y-4" gap={0.08}>
+                {[
+                  { icon: Clock,      accent: 'brand',  title: 'Day-by-day, hour-anchored', body: 'Morning, afternoon, and evening blocks with named streets, venues, and realistic timings.' },
+                  { icon: TrendingUp, accent: 'amber',  title: 'Per-category budget split', body: 'Accommodation, food, transport, activities — each with a daily average you can sanity-check.' },
+                  { icon: Utensils,   accent: 'rose',   title: 'Local dishes, named', body: 'Specific plates with a line on what they are, pulled from the retrieved food sections.' },
+                  { icon: MapPin,     accent: 'teal',   title: 'Hidden gems', body: 'The tourist-free alternatives — the power-plant sculpture museum, not just the Colosseum.' },
+                ].map((item) => (
+                  <StaggerItem key={item.title}>
+                    <div className="group flex gap-4">
+                      <IconBadge icon={item.icon} accent={item.accent} variant="tint" size="sm" />
+                      <div>
+                        <h3 className="text-h3 text-ink">{item.title}</h3>
+                        <p className="mt-1 text-small text-ink-soft">{item.body}</p>
+                      </div>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            </div>
+
+            {/* Mock output panel */}
+            <Reveal direction="left" delay={0.1}>
+              <div className="relative">
+                <div className="orb -right-10 top-0 h-60 w-60 bg-amber-500/14" aria-hidden="true" />
+                <div className="relative card overflow-hidden rounded-xl shadow-xl">
+                  {/* Panel header */}
+                  <div className="flex items-center justify-between border-b border-line bg-surface-sunken px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-pill bg-rose-300" aria-hidden="true" />
+                      <span className="h-2.5 w-2.5 rounded-pill bg-amber-300" aria-hidden="true" />
+                      <span className="h-2.5 w-2.5 rounded-pill bg-brand-300" aria-hidden="true" />
+                    </div>
+                    <span className="font-mono text-[0.625rem] text-ink-muted">itinerary.json</span>
+                  </div>
+
+                  <div className="space-y-4 p-5 sm:p-6">
+                    {/* Budget bars */}
+                    <div>
+                      <p className="caption-meta mb-3">Budget breakdown</p>
+                      <div className="space-y-2.5">
+                        {[
+                          { k: 'Accommodation', v: '$400', pct: 40, bar: 'bg-grad-sky' },
+                          { k: 'Food & Dining', v: '$200', pct: 20, bar: 'bg-grad-rose' },
+                          { k: 'Activities',    v: '$180', pct: 18, bar: 'bg-grad-brand' },
+                          { k: 'Transport',     v: '$150', pct: 15, bar: 'bg-grad-amber' },
+                        ].map((row) => (
+                          <div key={row.k}>
+                            <div className="mb-1.5 flex items-center justify-between text-tiny">
+                              <span className="text-ink-soft">{row.k}</span>
+                              <span className="data-num font-semibold text-ink">{row.v}</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-pill bg-ink/[0.07]">
+                              <div
+                                className={`h-full origin-left animate-bar-grow rounded-pill ${row.bar}`}
+                                style={{ width: `${row.pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rule" />
+
+                    {/* Local food chips */}
+                    <div>
+                      <p className="caption-meta mb-2.5">Local flavors</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['Cacio e Pepe', 'Carbonara', 'Supplì', 'Porchetta'].map((d) => (
+                          <span key={d} className="rounded-pill border border-rose-500/16 bg-rose-500/[0.07] px-2.5 py-1 text-caption font-medium text-rose-700">
+                            {d}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rule" />
+
+                    {/* Hidden gems */}
+                    <div>
+                      <p className="caption-meta mb-2.5">Hidden gems</p>
+                      <ul className="space-y-1.5">
+                        {['Centrale Montemartini', 'Aventine Hill keyhole view', 'Ostia Antica'].map((g) => (
+                          <li key={g} className="flex items-center gap-2 text-tiny text-ink-soft">
+                            <Star className="h-3 w-3 shrink-0 text-teal-600" aria-hidden="true" />
+                            {g}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ FINAL CTA ═══════════════ */}
+      <section className="relative bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-shell px-5 sm:px-8">
+          <Reveal direction="up">
+            <div className="relative overflow-hidden rounded-2xl bg-grad-ink bg-noise px-7 py-14 text-center sm:px-14 sm:py-18">
+              <div className="orb -left-12 -top-12 h-64 w-64 bg-brand-500/24" aria-hidden="true" />
+              <div className="orb -bottom-16 -right-10 h-64 w-64 bg-violet-500/20" aria-hidden="true" />
+
+              <div className="relative mx-auto max-w-2xl">
+                <span className="eyebrow rounded-pill border border-white/14 bg-white/[0.07] px-3 py-1.5 text-white/72">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  Free · No signup
+                </span>
+                <h2 className="mt-6 text-display text-white text-balance">
+                  Your next trip, grounded in real sources
+                </h2>
+                <p className="mx-auto mt-4 max-w-xl text-lead text-white/60">
+                  Pick a destination, set a budget, and watch the retrieval pipeline
+                  build something specific enough to actually use.
+                </p>
+                <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                  <a href="#plan" className="btn-primary btn-lg">
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                    Build my itinerary
+                    <ArrowRight className="btn-arrow h-4 w-4" aria-hidden="true" />
+                  </a>
+                  <Link to="/chat" className="btn-glass btn-lg">
+                    Try the assistant
+                    <ArrowUpRight className="btn-arrow h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>

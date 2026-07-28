@@ -1,79 +1,89 @@
 ---
-name: "Hôtel Rivière"
-description: "A boutique hotel that wears its restraint as luxury. Warm pearl-bone surfaces, Cormorant Infant for room names at oversized scale, Inter for body, a single sage-olive accent reserved for the Reserve CTA. Built for hospitality, restaurant groups, and travel brands that want quiet European elegance over moody hotel-stock photography."
-tags: [hospitality, editorial, premium, warm, minimal]
+name: "Waypoint"
+description: "A functional, accessibility-first system for consumer travel and discovery products. Forest-green ink (#002b11) on white/near-white surfaces, Inter everywhere, soft-shadowed cards that lift on hover, full-pill buttons, and a warm four-color accent quartet — coral, gold, sky, sage — reserved for category wayfinding, never decoration. Built for products that need to feel trustworthy and fast, not precious. WCAG 2.2 AA is a hard requirement, not an aspiration."
+tags: [travel, consumer, functional, accessible, structured, modern]
 colors:
-  primary:   "#1d1a14"
-  secondary: "#7a7468"
-  tertiary:  "#1d1a14"
-  neutral:   "#ece5d3"
-  surface:   "#f6f0dd"
+  primary:   "#002b11"
+  secondary: "#38443a"
+  tertiary:  "#3f6b52"
+  neutral:   "#f7f7f7"
+  surface:   "#ffffff"
+accents:
+  coral: "#e2673f"
+  gold:  "#d4a24c"
+  sky:   "#4a8fb0"
+  sage:  "#3f6b52"
 typography:
-  display: "Cormorant Infant"
+  display: Inter
   body:    Inter
-  mono:    "JetBrains Mono"
+  mono:    Inter
   scale:
-    hero: "8rem / 0.92 / 400 / -0.045em"
-    h1:   "4.5rem / 1 / 400 / -0.03em"
-    h2:   "2rem / 1.18 / 400 / -0.018em"
-    body: "1.0625rem / 1.7 / 400 / -0.005em"
+    hero: "4.5rem / 1.05 / 400 / -0.02em"
+    h1:   "2.5rem / 1.15 / 400 / -0.01em"
+    h2:   "1.375rem / 1.3 / 400 / -0.004em"
+    body: "1rem / 1.6 / 400 / 0"
 radius:
-  sm: 1px
-  md: 2px
-  lg: 3px
+  sm: 8px
+  md: 12px
+  lg: 20px
   pill: 9999px
 shadows:
-  card:   none
+  card:   "0 2px 12px rgba(0,43,17,0.08)"
+  cardHover: "0 6px 24px rgba(0,43,17,0.14)"
   button: none
 borders:
-  card:    "1px solid rgba(29,26,20,0.10)"
-  divider: rgba(29,26,20,0.14)
+  card:    "1px solid rgba(0,43,17,0.10)"
+  divider: "rgba(0,43,17,0.18)"
 buttons:
   primary:
-    background: #5a6238
-    color: #f6f0dd
+    background: "#002b11"
+    color: "#ffffff"
     border: none
-    shape: sharp
+    shape: pill
     padding: 13px 26px
-    font: 500 / 0.8125rem / 0.16em
+    font: 500 / 0.8125rem / 0.02em
     uppercase: true
   secondary:
     background: transparent
-    color: #1d1a14
-    border: 1px solid #1d1a14
-    shape: sharp
+    color: "#002b11"
+    border: "1.5px solid #002b11"
+    shape: pill
     padding: 13px 26px
-    font: 500 / 0.8125rem / 0.16em
+    font: 500 / 0.8125rem / 0.02em
     uppercase: true
   outline:
     background: transparent
-    color: #1d1a14
-    border: 1px solid rgba(29,26,20,0.18)
-    shape: sharp
+    color: "#002b11"
+    border: "1.5px solid rgba(0,43,17,0.22)"
+    shape: pill
     padding: 13px 26px
-    font: 500 / 0.8125rem / 0.16em
+    font: 500 / 0.8125rem / 0.02em
     uppercase: true
   ghost:
     background: transparent
-    color: #7a7468
+    color: "#38443a"
     border: none
-    shape: sharp
+    shape: pill
     padding: 13px 18px
-    font: 500 / 0.8125rem / 0.16em
+    font: 500 / 0.8125rem / 0.02em
     uppercase: true
 charts:
-  variant: "thin-bars"
-  stroke_width: 1
-  fill_opacity: 0
+  variant: "colored-pill-bars"
+  stroke_width: 5
+  fill_opacity: 1
   gridlines: false
-  bar_gap: 20px
-  highlight: single
+  bar_gap: 14px
+  highlight: per-category
   dot_marker: false
-fonts_url: "https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+accessibility:
+  standard: "WCAG 2.2 AA"
+  focus_visible: "2px solid #002b11, 2px offset, only on :focus-visible"
+  keyboard_first: true
+fonts_url: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 dependencies: ["lucide-react"]
 ---
 
-# Hôtel Rivière
+# Waypoint
 
 ## AI Build Instructions
 
@@ -85,22 +95,24 @@ dependencies: ["lucide-react"]
 
 ### 1 · Your role
 
-You are building UI for a project that has adopted **Hôtel Rivière** as its
-design system. Treat `DESIGN.md` as the single source of truth.
-Your job is to translate the user's product requirements into
-components and pages that look like they were designed by the same
-person who authored this file.
+You are building UI for a product that has adopted **Waypoint** as its
+design system. Treat `DESIGN.md` as the single source of truth. Your job is
+to translate the user's product requirements into components and pages that
+look like they were designed by the same person who authored this file.
 
 ### 2 · Token compliance
 
-- Pull every color, font family, radius, shadow, and spacing value
-  from the frontmatter at the top of this file.
-- Use semantic roles (e.g. `primary`, `accent`, `muted`) — never
-  hard-code hex values that bypass the system.
-- When a token can be expressed as a CSS variable, declare it once
-  in your global stylesheet and reference it everywhere downstream.
-- The Google Fonts `<link>` is provided in the Typography section.
-  Add it to `<head>` before any component renders.
+- Pull every color, font family, radius, shadow, and spacing value from the
+  frontmatter at the top of this file.
+- Use semantic roles (e.g. `primary`, `accent`, `muted`) — never hard-code
+  hex values that bypass the system.
+- When a token can be expressed as a CSS variable or Tailwind config entry,
+  declare it once and reference it everywhere downstream — never inline a
+  raw hex or arbitrary-value utility in a component.
+- The Google Fonts `<link>` is provided in the Typography section. Add it to
+  `<head>` before any component renders.
+- Accent colors (`coral`/`gold`/`sky`/`sage`) are a **fixed four-item
+  palette** for categorization — see §7. Do not introduce a fifth accent.
 
 ### 3 · Component recipes
 
@@ -108,168 +120,318 @@ Use these recipes verbatim when building the corresponding component.
 
 #### Buttons
 
-Four variants are defined. Pick one — never blend variants or invent a fifth.
+Four variants are defined. Pick one — never blend variants or invent a
+fifth. All four are **full pill** (`border-radius: 9999px`), not sharp —
+that is this system's defining shape signal.
 
-- **Primary** — sharp shape, bg `#5a6238`, text `#f6f0dd`, padding `13px 26px`, weight `500`, uppercased.
-- **Secondary** — sharp shape, text `#1d1a14`, border `1px solid #1d1a14`, padding `13px 26px`, weight `500`, uppercased.
-- **Outline** — sharp shape, text `#1d1a14`, border `1px solid rgba(29,26,20,0.18)`, padding `13px 26px`, weight `500`, uppercased.
-- **Ghost** — sharp shape, text `#7a7468`, padding `13px 18px`, weight `500`, uppercased.
+- **Primary** — pill, bg `#002b11`, text `#ffffff`, padding `13px 26px`,
+  weight `500`, uppercased, `0.02em` tracking.
+- **Secondary** — pill, text `#002b11`, border `1.5px solid #002b11`, same
+  padding/weight/tracking.
+- **Outline** — pill, text `#002b11`, border `1.5px solid rgba(0,43,17,0.22)`,
+  same padding/weight/tracking.
+- **Ghost** — pill, text `#38443a`, no border, padding `13px 18px`.
 
-Reach for **primary** as the single dominant CTA per screen.
-**Secondary** for the supporting action. **Outline** for tertiary
-actions in toolbars. **Ghost** for inline links and table actions.
+Reach for **primary** as the single dominant CTA per screen. **Secondary**
+for the supporting action. **Outline** for tertiary actions. **Ghost** for
+inline/low-stakes actions (e.g. a chat send button — see Hard Constraints).
+
+Every variant needs explicit `:hover`, `:focus-visible`, `:active`, and
+`:disabled` states — see §8 Accessibility. `:disabled` is `opacity: 0.4;
+cursor: not-allowed` across all four variants.
 
 #### Cards
 
-- Background: `#f6f0dd`
-- Border: `1px solid rgba(29,26,20,0.10)`
-- Shadow: `none`
-- Radius: `radius.lg` (`3px`)
-- Internal padding: `20px` for compact cards, `24–28px` for content cards.
+- Background: `#ffffff`
+- Border: `1px solid rgba(0,43,17,0.10)`
+- Shadow: `0 2px 12px rgba(0,43,17,0.08)` at rest
+- Radius: `radius.lg` (`20px`)
+- Hover: shadow deepens to `0 6px 24px rgba(0,43,17,0.14)`, border darkens
+  slightly — cards should feel like they lift, not just outline-highlight.
+- A `card-suite` variant (repeating/collection items — e.g. saved-item
+  cards) adds a `3px solid #002b11` top border as the one extra accent.
 
-#### Tabs
+#### Icon badges
 
-Variant: `underline`. Flat row of labels. Active tab gets a 2px underline in the accent color — no fill.
+The system's one distinctive, non-obvious recipe. A small (`w-8`–`w-9`)
+rounded-square badge sits before headings/list items throughout the UI.
+**Not every badge gets an accent color** — apply this rule exactly:
 
-#### Charts
+- If the icon is one of **several sibling items in the same set**
+  (category icons in a chart legend, cards in a feature grid, repeating
+  list/collection items), give it a tinted badge: `background:
+  {accent}/12% opacity`, icon `color: {accent}` (full solid). Rotate through
+  the four accents (`coral`/`gold`/`sky`/`sage`) so siblings are visually
+  distinct from each other.
+- If the icon is a **singular header for a generic container** (a card's
+  own title icon, a page section header, the nav logo), it stays neutral —
+  `color: #002b11`, no tinted background. Recoloring a one-off header icon
+  is noise, not signal; the accent system exists to help users tell
+  categories apart, not to decorate.
 
-- Bar/line variant: `thin-bars`
-- No gridlines — let the bars/lines carry the data.
-- Highlight strategy: `single` — emphasize a single bar/point per chart.
+#### Charts / data bars
 
-#### Typography pairings
+- Variant: `colored-pill-bars` — each category/series gets its own accent
+  color, not a single-highlight-vs-gray scheme.
+- Bar height `5px`, full pill radius, `14px` gap between rows.
+- The top/leading value in a set renders at full opacity; others at `45%`
+  opacity of their own color — this still reads as "what's dominant" while
+  keeping every row identifiably its own category.
+- No gridlines. No dot markers.
 
-- **Display (`Cormorant Infant`)** — h1, h2, hero headlines, brand wordmarks.
-- **Body (`Inter`)** — paragraphs, labels, button text, form inputs.
-- **Mono (`JetBrains Mono`)** — code, eyebrows, metadata, numerals in tables.
+#### Background accents
 
-### 4 · Hard constraints
+`.aurora-bg` — a soft multi-color radial-gradient wash (coral/sky/gold at
+8–10% opacity over white) reserved for **"moment" surfaces only**: a page's
+hero section, or a single AI-generated/highlighted result card. Never apply
+it to more than one surface per screen — it's a spotlight, not a texture.
+
+#### Tabs / nav
+
+Active tab or nav item is a **solid filled pill** (`bg-primary`, inverse
+text), not an underline or font-style switch. Inactive items are secondary
+ink text with a hover background tint.
+
+### 4 · Typography pairings
+
+Single family — Inter — used for everything, at different weights/sizes.
+This system has **no display/serif pairing**; do not introduce one. Scale
+distinction comes from size and weight (`500`/`600` for headings, `400` for
+body), not font-family switching.
+
+### 5 · Spacing & layout
+
+- Base unit: `4px` (standard Tailwind default scale — this system does not
+  define a custom spacing scale; use `4/8/12/16/24/32/48/64` etc. directly).
+- Section padding: generous but not extreme — `64–96px` vertical on desktop
+  sections, not the 200px "lobby air" of more editorial systems. This is a
+  functional product, not a hospitality showcase.
+
+### 6 · Motion
+
+- `duration-fast`: `100ms` — micro-interactions (icon opacity, small state
+  flips).
+- `duration-base`: `200ms` — color/shadow/border transitions, hover states.
+- Nothing slower than `200ms` for UI feedback. This is a fast, functional
+  system — motion should never feel decorative or delayed.
+
+### 7 · The accent quartet — hard rule
+
+`coral` `#e2673f`, `gold` `#d4a24c`, `sky` `#4a8fb0`, `sage` `#3f6b52`. This
+is a **closed set of four**. Their job is category disambiguation (see Icon
+Badges, §3), not mood or decoration. Concretely:
+
+- Never use an accent color for body text, primary CTAs, or backgrounds
+  larger than a badge/gradient-wash — those stay in the primary ink/white
+  system.
+- Never invent a fifth accent for a fifth category — reuse one of the four,
+  or fall back to neutral `ink-secondary` if a category is genuinely
+  "miscellaneous"/unranked (see BudgetBreakdown's "Miscellaneous" row for
+  the reference implementation: no accent, plain muted gray).
+
+### 8 · Accessibility — hard constraints
+
+This system's accessibility rules are load-bearing, not decorative:
+
+- **Every interactive element** needs a real `:focus-visible` state — a
+  `2px solid #002b11` outline with `2px` offset, visible only for keyboard
+  navigation (`:focus-visible`, never plain `:focus`, so mouse/touch users
+  don't see a ring on click).
+- **Every custom clickable component** (a `<div>` acting as a card/button)
+  must have `role="button"`, `tabIndex={0}`, and an `onKeyDown` handler for
+  `Enter`/`Space` — a `<div onClick>` alone is not acceptable, full stop.
+- **Contrast**: primary ink (`#002b11`) on white or near-white surfaces
+  clears WCAG AAA, not just AA — don't lighten it "for aesthetics." Accent
+  colors at their solid value (not the 12%-opacity badge tint) must be
+  checked against their background before use as text.
+- **No color-only signal.** The "top category" in a chart, or an active
+  nav item, must also differ in weight/fill/opacity/position — never rely
+  on hue alone to convey state.
+
+### 9 · Hard constraints (general)
 
 Never do any of the following without explicit instruction from the user:
 
 - Introduce a new color, font, radius, or shadow that isn't declared above.
-- Mix this system with another (e.g. don't paste in Material or Bootstrap defaults).
-- Use generic gradient defaults (purple→blue, peach→pink) — they break the system's voice.
-- Reach for emoji icons. Use a consistent icon library and size icons in line with body type.
-- Add motion that exceeds the system's restraint — keep transitions short (≤200ms) and subtle.
+- Add a display/serif font — this system is intentionally single-family.
+- Use sharp/near-sharp button corners — buttons are always full pill.
+- Use flat, shadowless cards — cards always carry `shadow.card` at rest.
+- Tint an icon badge that's a singular container header (see §3).
+- Skip the `:focus-visible` state on any new interactive element.
+- Reach for emoji icons — use `lucide-react` consistently.
 
-### 5 · Before you finish — verify
+### 10 · Before you finish — verify
 
-Run through this checklist for every screen you produce:
-
-- [ ] Every color used appears in the Colors table above.
-- [ ] Headlines use the display font; body copy uses the body font.
-- [ ] Buttons match one of the declared variants exactly (shape, padding, weight).
-- [ ] Border-radius values come from `radius.sm` / `radius.md` / `radius.lg` / `radius.pill`.
-- [ ] Cards and dividers use the declared border + shadow tokens.
-- [ ] No values were invented; if you needed something missing, you stopped and asked.
+- [ ] Every color used appears in the Colors/Accents table above.
+- [ ] All text uses Inter — no second family anywhere.
+- [ ] Buttons match one of the four declared pill variants exactly.
+- [ ] Cards carry `shadow.card` at rest and deepen on hover.
+- [ ] Icon badges follow the sibling-vs-singular rule in §3 — not every
+      icon is tinted.
+- [ ] Every new interactive element has a visible `:focus-visible` state.
+- [ ] Any custom `<div>`-as-button has `role`, `tabIndex`, and keyboard
+      handling.
+- [ ] No values were invented; if something was missing, you stopped and
+      asked.
 
 ---
 
 ## 1. Atmosphere
 
-Hôtel Rivière is a boutique hotel that wears restraint as luxury. The page surface is warm pearl-bone `#f6f0dd` — closer to handmade card stock than to white. Room and suite names run in Cormorant Infant at 128px, weight 400 — the soft-cornered didone glyphs giving every name an inscribed-on-stone permanence without any heaviness. Body sits in Inter at 17px on a 1.7 leading. UI labels run in Inter 500 with extreme 0.16em uppercase tracking — the brass-plaque caption voice. The single accent is sage-olive `#5a6238` that appears only on the Reserve CTA — the singular booking gesture in the entire system gets the singular color.
-
-The discipline is in the proportion: massive Cormorant Infant on warm pearl, generous negative space, and one sage-olive button per page that reads as a stamped reservation seal.
+Waypoint is a functional, trustworthy travel-platform system — closer to a
+well-built dashboard than a boutique brochure. The page surface is clean
+white, occasionally lifted to `#f7f7f7`. Text and primary actions run in a
+near-black forest green, `#002b11` — dark enough to read as "serious" and
+"grounded," warm enough not to feel corporate-navy. Cards carry real,
+if restrained, shadow and lift slightly on hover — this is a system that
+believes in soft depth, unlike flatter editorial systems. Buttons are full
+pills. A fixed quartet of warm accents — coral, gold, sky, sage — appears
+only where there's more than one of something to tell apart: three feature
+cards, five budget categories, four essentials cards. Everywhere else stays
+disciplined forest-green-on-white.
 
 **Signature moves**
-- Cormorant Infant 400 at 128px for room/suite names — soft didone, drama through scale
-- Warm pearl-bone surface `#f6f0dd` — never white, never cream
-- Sage-olive `#5a6238` exclusively on the Reserve CTA — one booking gesture, one color
-- All UI labels uppercase 0.16em tracking — the brass-plaque voice
-- Sharp 1-3px radius — almost zero, brass-plaque precision
-- Section padding 200px desktop — the air IS the lobby
+- Forest green `#002b11` ink on white — never black, never cream
+- Inter, single family, everywhere — no display/serif pairing
+- Full-pill buttons and active nav states — no sharp corners anywhere
+- Real soft shadows on cards, deepening on hover — not flat/hairline-only
+- A closed four-accent quartet (coral/gold/sky/sage) reserved for telling
+  sibling categories apart — never for decoration or single-item cards
+- `:focus-visible` keyboard rings and full keyboard operability everywhere,
+  treated as core requirements, not an accessibility pass at the end
 
 ## 2. Palette
 
 ### Surfaces
-- **Pearl Bone** `#f6f0dd` — page background (warm card stock)
-- **Pearl Lift** `#ece5d3` — secondary surfaces, gallery panels
-- **Hairline** `rgba(29,26,20,0.10)` — every divider
+- **Paper** `#ffffff` — page background
+- **Paper Lift** `#f7f7f7` — secondary surfaces, elevated panels
+- **Hairline** `rgba(0,43,17,0.14)` — dividers, resting card borders
 
 ### Ink
-- **Ink** `#1d1a14` — text, headings, secondary CTA fill
-- **Ink 50** `#7a7468` — secondary text, mono captions
+- **Ink** `#002b11` — text, headings, primary CTA fill, focus rings
+- **Ink Secondary** `#38443a` — secondary text, muted labels
 
-### Accent
-- **Sage Olive** `#5a6238` — Reserve CTA only
-- That is the only color in the system.
+### Accent quartet (categorization only — see §7 above)
+- **Coral** `#e2673f`
+- **Gold** `#d4a24c`
+- **Sky** `#4a8fb0`
+- **Sage** `#3f6b52`
+
+### Status
+- **Success** `#3a8c5c`
+- **Error** `#c4493a`
 
 ## 3. Typography
 
 | Role | Font | Size | Weight | Leading | Tracking |
 |------|------|------|--------|---------|----------|
-| Suite Name (Hero) | Cormorant Infant | 128px | 400 | 0.92 | -0.045em |
-| H1 | Cormorant Infant | 72px | 400 | 1.0 | -0.03em |
-| H2 | Cormorant Infant | 32px | 400 | 1.18 | -0.018em |
-| Pull Quote | Cormorant Infant (italic) | 28px | 400 | 1.3 | -0.012em |
-| Body | Inter | 17px | 400 | 1.7 | -0.005em |
-| UI / Button | Inter | 13px | 500 | 1.4 | 0.16em uppercase |
-| Caption / Date | JetBrains Mono | 11px | 500 | 1.0 | 0.10em uppercase |
-| Room Number | JetBrains Mono | 14px | 500 | 1.0 | 0.04em uppercase tabular-nums |
+| Hero | Inter | 72px | 400 | 1.05 | -0.02em |
+| Hero (mobile) | Inter | 44px | 400 | 1.1 | -0.015em |
+| H1 | Inter | 40px | 400 | 1.15 | -0.01em |
+| H2 | Inter | 22px | 400 | 1.3 | -0.004em |
+| Pull Quote | Inter (medium) | 18px | 500 | 1.55 | 0 |
+| Body | Inter | 16px | 400 | 1.6 | 0 |
+| UI / Button | Inter | 13px | 500 | 1.4 | 0.02em uppercase |
+| Caption | Inter | 12px | 400 | 1.4 | 0.01em uppercase |
+| Data / Figures | Inter | 14px | 400 | 1.2 | 0 (tabular-nums) |
 
-Cormorant Infant only at 400 — the soft-corner didone breaks at any heavier weight. Italic reserved for the chef's signature note and pull quotes.
+One family throughout. Distinction comes from size/weight, not a
+display-font switch — do not add Cormorant, Playfair, or any serif here.
 
 ## 4. Buttons
 
-### Primary (Sage Olive — Reserve only)
+### Primary (Forest Green — the dominant CTA)
 ```css
-background: #5a6238;
-color: #f6f0dd;
+background: #002b11;
+color: #ffffff;
 padding: 13px 26px;
-border-radius: 2px;
+border-radius: 9999px;
 text-transform: uppercase;
-letter-spacing: 0.16em;
+letter-spacing: 0.02em;
 font-weight: 500;
 ```
+Hover deepens to `#01421c` with a soft shadow; active darkens further to
+`#001f0c`; disabled drops to `opacity: 0.4`.
 
-The 0.16em tracking is wider than typical UI — that is the brass-plaque voice carried into the booking gesture. Reads as a stamped reservation seal, not a CTA button.
-
-### Secondary (Ink Outline — every other action)
-- Transparent, 1px solid ink, ink text — same near-sharp shape, same wide tracking
-
-### Outline & Ghost
-- Outline: transparent, 1px hairline at 18% ink
-- Ghost: no border, ink-50 uppercase, hover underlines
+### Secondary / Outline / Ghost
+- **Secondary** — transparent, `1.5px solid #002b11`, ink text, same pill
+  shape and padding as primary.
+- **Outline** — transparent, `1.5px solid rgba(0,43,17,0.22)` (softer
+  border), ink text.
+- **Ghost** — no border, `#38443a` text, smaller padding (`13px 18px`),
+  underline-free hover (background tint instead).
 
 ## 5. Cards
 
 ```css
-background: #f6f0dd;
-border: 1px solid rgba(29,26,20,0.10);
-border-radius: 3px;
-box-shadow: none;
+background: #ffffff;
+border: 1px solid rgba(0,43,17,0.10);
+border-radius: 20px;
+box-shadow: 0 2px 12px rgba(0,43,17,0.08);
 ```
+On hover: `box-shadow: 0 6px 24px rgba(0,43,17,0.14)`, border deepens to
+`rgba(0,43,17,0.18)`. Collection/suite cards (saved items) add a `3px
+solid #002b11` top border as their one extra accent — the "this is one of
+your saved things" signal.
 
-NO shadows, NO inset highlights. Suite cards lift to pearl-lift surface with a 1px ink top border (3px wide) — the only chrome.
+## 6. Icon badges & the accent quartet
 
-## 6. Charts
+The one component recipe unique to this system. See §3 and §7 of the AI
+Build Instructions above for the full rule — in short: badges for sibling
+categories get one of `coral`/`gold`/`sky`/`sage` at 12% background opacity
+with the icon in the solid accent color; badges for singular container
+headers stay neutral ink. This is how the system stays "aesthetic" without
+turning into decoration — color always means something.
 
-Thin precise bars (3px wide, 20px gap). One bar in sage-olive, others in 18% ink. NO gridlines. Y-axis labels in JetBrains Mono uppercase 11px. Charts are reserved for occupancy-by-month breakdowns and read as gallery exhibits.
+## 7. Charts
 
-## 7. Tabs
+Colored pill bars, one accent per category, `5px` height, full radius, no
+gridlines. The leading/dominant value renders at full opacity; the rest at
+`45%` of their own accent — every row stays identifiable as its category
+even when it isn't the largest.
 
-Underline 1px in ink for the active state. Inactive tabs are ink-50 in uppercase 0.16em. The active label is set in Cormorant Infant italic at the same size — that is the rhythm change, not a color shift.
+## 8. Tabs / navigation
 
-## 8. Spacing
+Active state is a solid filled pill (`bg-ink`, inverse text) — not an
+underline, not a font-style switch. Inactive items are `ink-secondary`
+with a `pearl-lift` hover tint.
 
-- Base 8px
-- Scale: `8, 16, 24, 32, 48, 64, 96, 128, 200, 280`
-- Section padding: 200px desktop, 96px mobile — the air IS the lobby
+## 9. Spacing
 
-## 9. Do's & don'ts
+- Base `4px`, standard scale (`4/8/12/16/24/32/48/64...`) — no custom
+  scale is defined for this system; use Tailwind's defaults directly.
+- Section padding: `64–96px` vertical on desktop, `32–48px` mobile —
+  generous but functional, not the extreme "air as luxury" of more
+  editorial systems.
+
+## 10. Accessibility
+
+- WCAG 2.2 AA is a hard requirement (see §8 of AI Build Instructions).
+- `*:focus-visible { outline: 2px solid #002b11; outline-offset: 2px; }`
+  globally — every interactive element, no exceptions.
+- Every custom clickable `<div>` needs `role="button"`, `tabIndex={0}`,
+  and `Enter`/`Space` key handling.
+- No color-only state signaling.
+
+## 11. Do's & don'ts
 
 ✅ **Do**
-- Use Cormorant Infant at 400 only — anything heavier breaks the soft-didone proportion
-- Hold the warm pearl-bone surface — white reads as web app, cream reads as wedding stationery
-- Reserve sage-olive for the Reserve CTA exclusively — one booking, one color
-- Use 0.16em uppercase tracking on every UI label — that's the brass-plaque voice
+- Use Inter at 400/500/600 only — this system has one family
+- Hold full-pill buttons and a soft-shadowed, hover-lifting card language
+- Reserve the accent quartet for telling siblings apart — chart categories,
+  feature grids, repeating collection items
+- Give every interactive element a real, visible `:focus-visible` ring
+- Make every custom `<div>`-as-button truly keyboard-operable
 
 ❌ **Don't**
-- Use moody hotel-stock photography — the typography earns the elegance
-- Use Cormorant Infant at 600+ — bold breaks the soft didone
-- Use a second accent — sage-olive alone, on the Reserve CTA only
-- Use any radius beyond 3px — corners must read as brass-plaque, not pill
+- Add a second (display/serif) font family
+- Use sharp-cornered buttons — pill shape is non-negotiable here
+- Tint a singular header icon just because tinted badges look nice
+  elsewhere — the rule is sibling-sets only
+- Introduce a fifth accent color, or use an accent for body text/large
+  backgrounds
+- Rely on hue alone (no accompanying weight/opacity/position change) to
+  signal state
 
 ---
 
@@ -282,110 +444,136 @@ Underline 1px in ink for the active state. Inactive tabs are ink-50 in uppercase
 
 | Role      | Value |
 |-----------|-------|
-| primary   | `#1d1a14` |
-| secondary | `#7a7468` |
-| tertiary  | `#1d1a14` |
-| neutral   | `#ece5d3` |
-| surface   | `#f6f0dd` |
+| primary   | `#002b11` |
+| secondary | `#38443a` |
+| tertiary  | `#3f6b52` |
+| neutral   | `#f7f7f7` |
+| surface   | `#ffffff` |
+
+### Accents
+
+| Role  | Value |
+|-------|-------|
+| coral | `#e2673f` |
+| gold  | `#d4a24c` |
+| sky   | `#4a8fb0` |
+| sage  | `#3f6b52` |
+
+### Status
+
+| Role    | Value |
+|---------|-------|
+| success | `#3a8c5c` |
+| error   | `#c4493a` |
 
 ### Typography
 
-- **Display:** Cormorant Infant
+- **Display:** Inter
 - **Body:** Inter
-- **Mono:** JetBrains Mono
+- **Mono:** Inter
 
 | Role | size / leading / weight / tracking |
 |------|------------------------------------|
-| Hero | 8rem / 0.92 / 400 / -0.045em |
-| H1   | 4.5rem / 1 / 400 / -0.03em |
-| H2   | 2rem / 1.18 / 400 / -0.018em |
-| Body | 1.0625rem / 1.7 / 400 / -0.005em |
+| Hero | 4.5rem / 1.05 / 400 / -0.02em |
+| H1   | 2.5rem / 1.15 / 400 / -0.01em |
+| H2   | 1.375rem / 1.3 / 400 / -0.004em |
+| Body | 1rem / 1.6 / 400 / 0 |
 
 ### Radius
 
-- sm: `1px`
-- md: `2px`
-- lg: `3px`
+- sm: `8px`
+- md: `12px`
+- lg: `20px`
 - pill: `9999px`
 
 ### Shadows
 
-- **card:** `none`
+- **card:** `0 2px 12px rgba(0,43,17,0.08)`
+- **cardHover:** `0 6px 24px rgba(0,43,17,0.14)`
 - **button:** `none`
 
 ### Borders
 
-- **card:** `1px solid rgba(29,26,20,0.10)`
-- **divider:** `rgba(29,26,20,0.14)`
+- **card:** `1px solid rgba(0,43,17,0.10)`
+- **divider:** `rgba(0,43,17,0.18)`
 
 ### Buttons
 
-Four variants, each fully tokenized. The preview renders from these exact values.
+Four variants, each fully tokenized, all full-pill shape.
 
 #### Primary
 
 | Property | Value |
 |----------|-------|
-| shape | `sharp` |
-| background | `#5a6238` |
-| color | `#f6f0dd` |
+| shape | `pill` |
+| background | `#002b11` |
+| color | `#ffffff` |
 | border | `none` |
 | padding | `13px 26px` |
 | fontWeight | `500` |
 | fontSize | `0.8125rem` |
-| letterSpacing | `0.16em` |
+| letterSpacing | `0.02em` |
 | uppercase | `true` |
 
 #### Secondary
 
 | Property | Value |
 |----------|-------|
-| shape | `sharp` |
+| shape | `pill` |
 | background | `transparent` |
-| color | `#1d1a14` |
-| border | `1px solid #1d1a14` |
+| color | `#002b11` |
+| border | `1.5px solid #002b11` |
 | padding | `13px 26px` |
 | fontWeight | `500` |
 | fontSize | `0.8125rem` |
-| letterSpacing | `0.16em` |
+| letterSpacing | `0.02em` |
 | uppercase | `true` |
 
 #### Outline
 
 | Property | Value |
 |----------|-------|
-| shape | `sharp` |
+| shape | `pill` |
 | background | `transparent` |
-| color | `#1d1a14` |
-| border | `1px solid rgba(29,26,20,0.18)` |
+| color | `#002b11` |
+| border | `1.5px solid rgba(0,43,17,0.22)` |
 | padding | `13px 26px` |
 | fontWeight | `500` |
 | fontSize | `0.8125rem` |
-| letterSpacing | `0.16em` |
+| letterSpacing | `0.02em` |
 | uppercase | `true` |
 
 #### Ghost
 
 | Property | Value |
 |----------|-------|
-| shape | `sharp` |
+| shape | `pill` |
 | background | `transparent` |
-| color | `#7a7468` |
+| color | `#38443a` |
 | border | `none` |
 | padding | `13px 18px` |
 | fontWeight | `500` |
 | fontSize | `0.8125rem` |
-| letterSpacing | `0.16em` |
+| letterSpacing | `0.02em` |
 | uppercase | `true` |
 
 ### Charts
 
 | Property | Value |
 |----------|-------|
-| variant | `thin-bars` |
-| strokeWidth | `1` |
-| fillOpacity | `0` |
+| variant | `colored-pill-bars` |
+| strokeWidth | `5` |
+| fillOpacity | `1` |
 | gridlines | `false` |
-| barGap | `20px` |
-| highlight | `single` |
+| barGap | `14px` |
+| highlight | `per-category` |
 | dotMarker | `false` |
+
+### Accessibility
+
+| Property | Value |
+|----------|-------|
+| standard | `WCAG 2.2 AA` |
+| focusRing | `2px solid #002b11, 2px offset` |
+| focusTrigger | `:focus-visible only` |
+| keyboardFirst | `true` |
