@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Sparkles, ArrowRight, ArrowUpRight, Database, Layers, Wallet, MessageSquare,
-  ImagePlus, Search, Star, Clock, MapPin, Sunrise, Sun, Moon,
-  ShieldCheck, Zap, FileText, CheckCircle2, Utensils, TrendingUp,
-  HelpCircle, Plus, Minus, Compass,
+  ImagePlus, Search, MapPin, Sunrise, Sun, Moon,
+  ShieldCheck, Zap, FileText, CheckCircle2, Compass,
 } from 'lucide-react';
 import TripForm from '../components/TripForm';
 import { Reveal, Stagger, StaggerItem } from '../components/ui/Reveal';
@@ -45,33 +44,6 @@ const HOW_STEPS = [
   },
 ];
 
-const FAQS = [
-  {
-    q: 'Is this really RAG, or just a prompt wrapper around an LLM?',
-    a: 'Real retrieval. Destination guides are chunked, embedded locally, and searched with a hybrid of BM25 keyword matching and dense vector similarity, merged by Reciprocal Rank Fusion — then a cross-encoder reranks the fused candidates before anything reaches the LLM. Measured against an 18-query labeled eval set: MRR@5 went from 0.944 (vector-only) to 0.972 (hybrid + rerank). A prompt wrapper has none of that — it\'s just the model\'s training data and whatever you typed.',
-  },
-  {
-    q: 'What happens if the LLM API is down?',
-    a: 'It fails over rather than failing. The generation call tries Groq first, then Gemini, then a local Ollama instance if one\'s running, then a templated fallback as the last resort — so a single provider outage doesn\'t take the whole app down. You can see which backend answered in the server logs on every request.',
-  },
-  {
-    q: 'How do you stop it from just making up landmarks?',
-    a: 'Retrieved passages are scored for relevance before they\'re used — if nothing in the corpus actually matches your destination, the retrieved-context block is dropped entirely and the itinerary page says so explicitly ("No matching guide in corpus — built from general knowledge") instead of quietly padding the answer with irrelevant places from other cities.',
-  },
-  {
-    q: 'Where does the map data come from?',
-    a: 'Each day\'s primary location is geocoded through OpenStreetMap\'s free Nominatim service — no Google Maps key, no paid API. The route line and numbered pins you see on a generated itinerary are real coordinates, not illustrative placeholders.',
-  },
-  {
-    q: 'Is my data stored anywhere?',
-    a: 'Embeddings are generated locally, not sent to a third-party vector API. Saving a trip writes it to MongoDB with no account or signup required. The one exception: if you upload a photo or video for the vision feature, that file is sent to Gemini for analysis — that\'s the only step that leaves this app\'s own infrastructure.',
-  },
-  {
-    q: 'How many destinations does it actually know?',
-    a: 'The retrieval corpus currently has 6 full destination guides (Rome, Tokyo, Paris, Bali, Bangkok, New York). Ask for anywhere else and you\'ll get an honest, clearly-labeled general-knowledge itinerary instead of a fabricated "grounded" one — see the badge at the top of any generated trip.',
-  },
-];
-
 // Fixed per time-of-day slot regardless of which example is showing, so the
 // icon language stays consistent as the card rotates.
 const TIME_SLOTS = [
@@ -104,7 +76,7 @@ const HeroPreview = () => {
   const day1 = data.itinerary?.[0];
 
   return (
-    <div className="relative mx-auto w-full max-w-[430px] lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-[430px]">
       {/* Glow behind the card */}
       <div className="orb -right-8 -top-10 h-56 w-56 bg-brand-400/26" aria-hidden="true" />
       <div className="orb -bottom-12 -left-10 h-56 w-56 bg-indigo-500/20" aria-hidden="true" />
@@ -120,7 +92,7 @@ const HeroPreview = () => {
           }
         }}
         aria-label={`View the full example itinerary for ${example.label}`}
-        className="card-gradient relative block w-full animate-fade-up cursor-pointer overflow-hidden rounded-xl p-5 text-left sm:p-6"
+        className="card-gradient relative block w-full animate-fade-up cursor-pointer overflow-hidden rounded-xl p-5 text-left shadow-[0_30px_60px_-15px_rgba(10,31,20,0.32)] dark:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.6)] sm:p-6"
         style={{ animationDelay: '280ms' }}
       >
         <div key={index} className="animate-fade-in">
@@ -217,19 +189,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   const openExample = (example) => navigate('/itinerary', { state: { itinerary: example.data } });
 
-  // Tracks which FAQ items are expanded, purely for the chevron's rotation.
-  // The disclosure itself is native <details>/<summary> — this state never
-  // gates content visibility, only a decorative icon.
-  const [openFaqs, setOpenFaqs] = useState(() => new Set());
-  const handleFaqToggle = (question) => (e) => {
-    setOpenFaqs((prev) => {
-      const next = new Set(prev);
-      if (e.target.open) next.add(question);
-      else next.delete(question);
-      return next;
-    });
-  };
-
   return (
     <div className="overflow-x-clip">
 
@@ -239,7 +198,7 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-grid" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-shell px-5 pb-20 pt-14 sm:px-8 sm:pt-20 lg:pb-28 lg:pt-24">
-          <div className="grid items-center gap-14 lg:grid-cols-[1.03fr_0.97fr] lg:gap-12">
+          <div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-6 xl:gap-10">
 
             {/* ── Copy column ──
                 Above-the-fold content animates via CSS, not JS. A hero that
@@ -250,8 +209,15 @@ const HomePage = () => {
                 the backdrop photo crossfades through very different scenes
                 (bright sky, dark stone, neon skyline), so text color alone
                 can never guarantee contrast against all of them. A panel
-                with a fixed, near-opaque surface color does. */}
-            <div className="rounded-3xl border border-line/70 bg-surface/92 px-6 py-8 text-center shadow-xl backdrop-blur-md dark:bg-surface/94 sm:px-9 sm:py-10 lg:px-10 lg:text-left">
+                with a fixed, near-opaque surface color does.
+
+                Capped at max-w-xl and left-aligned in its own column (not
+                stretched full-width) so the photo stays visible in the
+                margin around it — two distinct floating panels over one
+                backdrop, not a single two-column slab with a seam down the
+                middle. The slight counter-rotation vs. the preview card
+                (see below) reinforces the "two separate things" reading. */}
+            <div className="mx-auto max-w-xl rounded-3xl border border-line/70 bg-surface/92 px-6 py-8 text-center shadow-[0_30px_60px_-15px_rgba(10,31,20,0.32)] backdrop-blur-md dark:bg-surface/94 dark:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.55)] sm:px-9 sm:py-10 lg:mx-0 lg:-rotate-[0.6deg] lg:px-10 lg:text-left">
               <div className="inline-flex animate-fade-up items-center gap-2 rounded-pill border border-brand-500/18 bg-surface/70 py-1.5 pl-1.5 pr-3.5 shadow-xs backdrop-blur dark:bg-surface/90">
                 <span className="inline-flex items-center gap-1 rounded-pill bg-grad-brand px-2 py-0.5 text-caption font-bold text-white">
                   <Sparkles className="h-3 w-3" aria-hidden="true" />
@@ -312,8 +278,12 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* ── Visual column ── */}
-            <div className="relative lg:pl-4">
+            {/* ── Visual column ──
+                Offset lower and counter-tilted vs. the copy panel, capped to
+                its own width instead of stretching the column — reads as a
+                second card someone dropped onto the photo, not the other
+                half of a matched pair. */}
+            <div className="relative mx-auto max-w-[430px] lg:mx-0 lg:ml-auto lg:mt-16 lg:rotate-1">
               <HeroPreview />
             </div>
           </div>
@@ -462,155 +432,6 @@ const HomePage = () => {
                   <h3 className="mt-5 text-h3 text-white">{step.title}</h3>
                   <p className="mt-2 text-small leading-relaxed text-white/58">{step.body}</p>
                 </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
-      </section>
-
-      {/* ═══════════════ SAMPLE OUTPUT — SHOW, DON'T TELL ═══════════════ */}
-      <section className="relative overflow-hidden bg-surface py-20 sm:py-24">
-        <div className="mx-auto max-w-shell px-5 sm:px-8">
-          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-
-            <div>
-              <SectionHeading
-                align="left"
-                eyebrow="Real output"
-                eyebrowIcon={FileText}
-                title="What you actually get back"
-                lead="Not a wall of prose. A structured plan with costs, packing, local dishes, and the quiet spots most guides skip."
-                titleClass="text-display"
-              />
-
-              <Stagger className="mt-9 space-y-4" gap={0.08}>
-                {[
-                  { icon: Clock,      accent: 'brand',  title: 'Day-by-day, hour-anchored', body: 'Morning, afternoon, and evening blocks with named streets, venues, and realistic timings.' },
-                  { icon: TrendingUp, accent: 'amber',  title: 'Per-category budget split', body: 'Accommodation, food, transport, activities — each with a daily average you can sanity-check.' },
-                  { icon: Utensils,   accent: 'rose',   title: 'Local dishes, named', body: 'Specific plates with a line on what they are, pulled from the retrieved food sections.' },
-                  { icon: MapPin,     accent: 'teal',   title: 'Hidden gems', body: 'The tourist-free alternatives — the power-plant sculpture museum, not just the Colosseum.' },
-                ].map((item) => (
-                  <StaggerItem key={item.title}>
-                    <div className="group flex gap-4">
-                      <IconBadge icon={item.icon} accent={item.accent} variant="tint" size="sm" />
-                      <div>
-                        <h3 className="text-h3 text-ink">{item.title}</h3>
-                        <p className="mt-1 text-small text-ink-soft">{item.body}</p>
-                      </div>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-            </div>
-
-            {/* Mock output panel */}
-            <Reveal direction="left" delay={0.1}>
-              <div className="relative">
-                <div className="orb -right-10 top-0 h-60 w-60 bg-amber-500/14" aria-hidden="true" />
-                <div className="relative card overflow-hidden rounded-xl shadow-xl">
-                  {/* Panel header */}
-                  <div className="flex items-center justify-between border-b border-line bg-surface-sunken px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-pill bg-rose-300" aria-hidden="true" />
-                      <span className="h-2.5 w-2.5 rounded-pill bg-amber-300" aria-hidden="true" />
-                      <span className="h-2.5 w-2.5 rounded-pill bg-brand-300" aria-hidden="true" />
-                    </div>
-                    <span className="font-mono text-[0.625rem] text-ink-muted">itinerary.json</span>
-                  </div>
-
-                  <div className="space-y-4 p-5 sm:p-6">
-                    {/* Budget bars */}
-                    <div>
-                      <p className="caption-meta mb-3">Budget breakdown</p>
-                      <div className="space-y-2.5">
-                        {[
-                          { k: 'Accommodation', v: '$400', pct: 40, bar: 'bg-grad-sky' },
-                          { k: 'Food & Dining', v: '$200', pct: 20, bar: 'bg-grad-rose' },
-                          { k: 'Activities',    v: '$180', pct: 18, bar: 'bg-grad-brand' },
-                          { k: 'Transport',     v: '$150', pct: 15, bar: 'bg-grad-amber' },
-                        ].map((row) => (
-                          <div key={row.k}>
-                            <div className="mb-1.5 flex items-center justify-between text-tiny">
-                              <span className="text-ink-soft">{row.k}</span>
-                              <span className="data-num font-semibold text-ink">{row.v}</span>
-                            </div>
-                            <div className="h-1.5 overflow-hidden rounded-pill bg-ink/[0.07]">
-                              <div
-                                className={`h-full origin-left animate-bar-grow rounded-pill ${row.bar}`}
-                                style={{ width: `${row.pct}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rule" />
-
-                    {/* Local food chips */}
-                    <div>
-                      <p className="caption-meta mb-2.5">Local flavors</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {['Cacio e Pepe', 'Carbonara', 'Supplì', 'Porchetta'].map((d) => (
-                          <span key={d} className="rounded-pill border border-rose-500/16 bg-rose-500/[0.07] px-2.5 py-1 text-caption font-medium text-rose-700">
-                            {d}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rule" />
-
-                    {/* Hidden gems */}
-                    <div>
-                      <p className="caption-meta mb-2.5">Hidden gems</p>
-                      <ul className="space-y-1.5">
-                        {['Centrale Montemartini', 'Aventine Hill keyhole view', 'Ostia Antica'].map((g) => (
-                          <li key={g} className="flex items-center gap-2 text-tiny text-ink-soft">
-                            <Star className="h-3 w-3 shrink-0 text-teal-600" aria-hidden="true" />
-                            {g}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════ FAQ ═══════════════ */}
-      <section className="relative bg-surface py-20 sm:py-24">
-        <div className="mx-auto max-w-shell px-5 sm:px-8">
-          <SectionHeading
-            eyebrow="Questions"
-            eyebrowIcon={HelpCircle}
-            title="Straight answers, not marketing copy"
-            lead="Including the parts that are limitations, not just the parts that sound impressive."
-            className="mb-12"
-          />
-
-          <Stagger className="mx-auto max-w-prose space-y-3" gap={0.06}>
-            {FAQS.map((item) => (
-              <StaggerItem key={item.q}>
-                <details
-                  className="card overflow-hidden p-0"
-                  onToggle={handleFaqToggle(item.q)}
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-h3 text-ink marker:content-none [&::-webkit-details-marker]:hidden">
-                    {item.q}
-                    {openFaqs.has(item.q) ? (
-                      <Minus className="h-4.5 w-4.5 shrink-0 text-ink-muted" aria-hidden="true" />
-                    ) : (
-                      <Plus className="h-4.5 w-4.5 shrink-0 text-ink-muted" aria-hidden="true" />
-                    )}
-                  </summary>
-                  <p className="px-5 pb-5 text-body leading-relaxed text-ink-soft">
-                    {item.a}
-                  </p>
-                </details>
               </StaggerItem>
             ))}
           </Stagger>
