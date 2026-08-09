@@ -244,8 +244,14 @@ const HomePage = () => {
             {/* ── Copy column ──
                 Above-the-fold content animates via CSS, not JS. A hero that
                 needs JavaScript to become visible is a hero that renders blank
-                whenever rAF is throttled or a script fails. */}
-            <div className="text-center lg:text-left">
+                whenever rAF is throttled or a script fails.
+
+                Sits on a solid frosted panel rather than raw ink-on-photo —
+                the backdrop photo crossfades through very different scenes
+                (bright sky, dark stone, neon skyline), so text color alone
+                can never guarantee contrast against all of them. A panel
+                with a fixed, near-opaque surface color does. */}
+            <div className="rounded-3xl border border-line/70 bg-surface/92 px-6 py-8 text-center shadow-xl backdrop-blur-md dark:bg-surface/94 sm:px-9 sm:py-10 lg:px-10 lg:text-left">
               <div className="inline-flex animate-fade-up items-center gap-2 rounded-pill border border-brand-500/18 bg-surface/70 py-1.5 pl-1.5 pr-3.5 shadow-xs backdrop-blur dark:bg-surface/90">
                 <span className="inline-flex items-center gap-1 rounded-pill bg-grad-brand px-2 py-0.5 text-caption font-bold text-white">
                   <Sparkles className="h-3 w-3" aria-hidden="true" />

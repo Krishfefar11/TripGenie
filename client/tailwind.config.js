@@ -17,18 +17,22 @@ export default {
         // <html> can flip every `text-ink`/`bg-surface`/`border-line` usage
         // across the whole app at once, instead of needing a `dark:` variant
         // hand-added to every one of their hundreds of call sites.
+        // DEFAULT/etc resolve through the `-rgb` triplet variables (index.css)
+        // via rgb(var(...) / <alpha-value>) — required for Tailwind's
+        // opacity-modifier syntax (`bg-surface/70`, `bg-ink/[0.06]`) to work.
+        // A bare `var(--ink)` hex string can't take an alpha modifier at all.
         ink: {
-          DEFAULT: "var(--ink)",
-          soft: "var(--ink-soft)",
-          muted: "var(--ink-muted)",
-          faint: "var(--ink-faint)",
+          DEFAULT: "rgb(var(--ink-rgb) / <alpha-value>)",
+          soft: "rgb(var(--ink-soft-rgb) / <alpha-value>)",
+          muted: "rgb(var(--ink-muted-rgb) / <alpha-value>)",
+          faint: "rgb(var(--ink-faint-rgb) / <alpha-value>)",
         },
         surface: {
-          DEFAULT: "var(--surface)",
-          sunken: "var(--surface-sunken)",
-          raised: "var(--surface-raised)",
-          tint: "var(--surface-tint)",
-          deep: "var(--surface-deep)",
+          DEFAULT: "rgb(var(--surface-rgb) / <alpha-value>)",
+          sunken: "rgb(var(--surface-sunken-rgb) / <alpha-value>)",
+          raised: "rgb(var(--surface-raised-rgb) / <alpha-value>)",
+          tint: "rgb(var(--surface-tint-rgb) / <alpha-value>)",
+          deep: "rgb(var(--surface-deep-rgb) / <alpha-value>)",
         },
         line: {
           DEFAULT: "var(--line)",

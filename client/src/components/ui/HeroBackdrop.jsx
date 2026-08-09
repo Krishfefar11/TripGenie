@@ -58,14 +58,12 @@ const HeroBackdrop = () => {
             style={{ animationDelay: `${i * 6}s` }}
           />
         ))}
-        {/* Scrim: keeps the backdrop as texture, never competing with text contrast.
-            Uses the theme surface color (not a hardcoded white) so it stays
-            correct under dark mode instead of washing out light-mode text
-            against a still-white scrim. Dark mode needs a heavier scrim —
-            a dark overlay at the same opacity lets bright sky/building
-            highlights read as more visually competing than the equivalent
-            light overlay does on the same photo. */}
-        <div className="absolute inset-0 bg-surface/[0.86] dark:bg-surface/[0.94]" />
+        {/* Scrim: a light overall dim, not a photo-killing wash — the crossfade
+            between destination photos should stay clearly visible (that's the
+            point of it). Text contrast is handled separately by the solid
+            panel behind the copy column (see HomePage), not by flattening
+            the whole photo down to near-invisibility. */}
+        <div className="absolute inset-0 bg-surface/25 dark:bg-surface/40" />
       </div>
 
       {/* Attribution — small, unobtrusive, required by the Commons licenses */}
