@@ -49,6 +49,11 @@ const tripSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    // Fallback map-center point when a day has no geocoded marker of its own
+    destinationCoords: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   { timestamps: true }
 );

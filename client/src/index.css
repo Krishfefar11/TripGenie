@@ -12,11 +12,38 @@
   --ink: #0a1f14;
   --ink-soft: #33463b;
   --ink-muted: #6b7d72;
+  --ink-faint: #9aa8a0;
+  --surface: #ffffff;
+  --surface-sunken: #f7faf8;
+  --surface-raised: #ffffff;
+  --surface-tint: #f0f7f3;
+  --surface-deep: #06180f;
+  --line: rgba(10, 31, 20, 0.09);
+  --line-strong: rgba(10, 31, 20, 0.16);
+  --line-faint: rgba(10, 31, 20, 0.05);
   --brand-500: #12b76a;
   --brand-600: #039855;
   --brand-700: #027a48;
-  --line: rgba(10, 31, 20, 0.09);
   --nav-h: 68px;
+}
+
+/* Dark mode: same token names, inverted values — everything built on
+   text-ink/bg-surface/border-line (which is nearly the whole app) picks
+   this up automatically via the CSS variables above, no per-component
+   dark: variants required. */
+:root.dark {
+  --ink: #edf5f0;
+  --ink-soft: #c2d1c8;
+  --ink-muted: #8ea298;
+  --ink-faint: #5c6f65;
+  --surface: #0d1712;
+  --surface-sunken: #081209;
+  --surface-raised: #172419;
+  --surface-tint: #11201a;
+  --surface-deep: #050f0a;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.17);
+  --line-faint: rgba(255, 255, 255, 0.055);
 }
 
 * { -webkit-tap-highlight-color: transparent; }
@@ -29,11 +56,12 @@ html {
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--ink);
-  background-color: #ffffff;
+  background-color: var(--surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv11', 'ss01', 'kern';
   text-rendering: optimizeLegibility;
+  transition: background-color 220ms ease, color 220ms ease;
 }
 
 /* Respect the OS-level motion preference — animation is a garnish, never
@@ -61,11 +89,11 @@ body {
 ::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(10, 31, 20, 0.16);
+  background: var(--line-strong);
   border-radius: 9999px;
-  border: 3px solid #fff;
+  border: 3px solid var(--surface);
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(10, 31, 20, 0.3); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
 
 /* ══════════════════════════════════════════════════════════════════════
    BUTTONS — premium states: hover glow, press-down, loading, disabled
@@ -107,12 +135,12 @@ body {
 }
 
 .btn-secondary {
-  @apply btn bg-white text-ink;
-  border: 1px solid rgba(10, 31, 20, 0.13);
+  @apply btn bg-surface text-ink;
+  border: 1px solid var(--line-strong);
   box-shadow: 0 1px 2px rgba(10,31,20,0.05);
 }
 .btn-secondary:hover:not(:disabled) {
-  border-color: rgba(10, 31, 20, 0.26);
+  border-color: var(--ink-faint);
   box-shadow: 0 6px 16px -6px rgba(10,31,20,0.18);
   transform: translateY(-1.5px);
 }
@@ -121,7 +149,7 @@ body {
   @apply btn bg-transparent text-ink-soft;
   padding: 0.62rem 1rem;
 }
-.btn-ghost:hover:not(:disabled) { background: rgba(10, 31, 20, 0.05); color: var(--ink); }
+.btn-ghost:hover:not(:disabled) { background: var(--line-faint); color: var(--ink); }
 
 .btn-glass {
   @apply btn text-white;
@@ -139,29 +167,32 @@ body {
    ══════════════════════════════════════════════════════════════════════ */
 
 .card {
-  @apply relative bg-white rounded-lg;
+  @apply relative bg-surface-raised rounded-lg;
   border: 1px solid var(--line);
   box-shadow: 0 1px 3px rgba(10,31,20,0.05), 0 1px 2px rgba(10,31,20,0.03);
   transition: box-shadow 420ms cubic-bezier(0.22,1,0.36,1),
               transform 420ms cubic-bezier(0.22,1,0.36,1),
-              border-color 220ms ease;
+              border-color 220ms ease, background-color 220ms ease;
 }
 .card-hover:hover {
   transform: translateY(-4px);
-  border-color: rgba(10, 31, 20, 0.14);
+  border-color: var(--line-strong);
   box-shadow: 0 20px 34px -10px rgba(10,31,20,0.13), 0 8px 14px -8px rgba(10,31,20,0.07);
+}
+:root.dark .card-hover:hover {
+  box-shadow: 0 20px 34px -10px rgba(0,0,0,0.45), 0 8px 14px -8px rgba(0,0,0,0.3);
 }
 
 .card-sunken {
   @apply relative rounded-lg;
-  background: #f7faf8;
+  background: var(--surface-sunken);
   border: 1px solid var(--line);
 }
 
 /* Gradient-border card — the border itself is the accent. Uses a masked
-   pseudo-element so the fill stays pure white. */
+   pseudo-element so the fill stays the plain surface color. */
 .card-gradient {
-  @apply relative bg-white rounded-lg;
+  @apply relative bg-surface rounded-lg;
   box-shadow: 0 20px 34px -10px rgba(10,31,20,0.10);
 }
 .card-gradient::before {
@@ -182,6 +213,10 @@ body {
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
+:root.dark .glass {
+  background: rgba(13, 23, 18, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
 .glass-dark {
   background: rgba(6, 24, 15, 0.55);
   backdrop-filter: blur(18px) saturate(160%);
@@ -195,7 +230,7 @@ body {
 
 /* Animated multi-color mesh for hero moments */
 .bg-mesh {
-  background-color: #ffffff;
+  background-color: var(--surface);
   background-image:
     radial-gradient(at 12% 8%,  rgba(18,183,106,0.16) 0px, transparent 52%),
     radial-gradient(at 88% 4%,  rgba(99,102,241,0.13) 0px, transparent 50%),
@@ -203,13 +238,21 @@ body {
     radial-gradient(at 22% 78%, rgba(20,184,166,0.11) 0px, transparent 46%),
     radial-gradient(at 50% 34%, rgba(245,158,11,0.06) 0px, transparent 55%);
 }
+:root.dark .bg-mesh {
+  background-image:
+    radial-gradient(at 12% 8%,  rgba(18,183,106,0.22) 0px, transparent 52%),
+    radial-gradient(at 88% 4%,  rgba(99,102,241,0.18) 0px, transparent 50%),
+    radial-gradient(at 72% 62%, rgba(139,92,246,0.15) 0px, transparent 48%),
+    radial-gradient(at 22% 78%, rgba(20,184,166,0.15) 0px, transparent 46%),
+    radial-gradient(at 50% 34%, rgba(245,158,11,0.08) 0px, transparent 55%);
+}
 .bg-mesh-soft {
-  background-color: #f7faf8;
+  background-color: var(--surface-sunken);
   background-image:
     radial-gradient(at 84% 12%, rgba(18,183,106,0.10) 0px, transparent 48%),
     radial-gradient(at 10% 82%, rgba(99,102,241,0.09) 0px, transparent 46%);
 }
-.bg-tint { background-color: #f7faf8; }
+.bg-tint { background-color: var(--surface-tint); }
 
 /* Blueprint grid — subtle structure, fades out at the edges */
 .bg-grid {
@@ -220,11 +263,19 @@ body {
   -webkit-mask-image: radial-gradient(ellipse 78% 62% at 50% 42%, #000 42%, transparent 100%);
   mask-image: radial-gradient(ellipse 78% 62% at 50% 42%, #000 42%, transparent 100%);
 }
+:root.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.055) 1px, transparent 1px);
+}
 .bg-dots {
   background-image: radial-gradient(rgba(10,31,20,0.08) 1px, transparent 1px);
   background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 100%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 100%);
+}
+:root.dark .bg-dots {
+  background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
 }
 /* Film-grain noise — kills the "flat vector" feel on dark bands */
 .bg-noise::after {
@@ -301,6 +352,11 @@ body {
   /* Descenders get clipped without a hair of bottom padding */
   padding-bottom: 0.08em;
 }
+:root.dark .text-gradient {
+  /* The light-mode version anchors on dark ink, which would be near-
+     invisible against a dark background — start from a light tone instead. */
+  background-image: linear-gradient(115deg, #edf5f0 12%, #34d288 52%, #2dd4bf 88%);
+}
 .text-gradient-vivid {
   background-image: linear-gradient(115deg, #12b76a 0%, #0ea5e9 48%, #8b5cf6 100%);
   -webkit-background-clip: text;
@@ -339,13 +395,13 @@ body {
    ══════════════════════════════════════════════════════════════════════ */
 
 .input {
-  @apply w-full bg-white text-body text-ink rounded-md;
+  @apply w-full bg-surface text-body text-ink rounded-md;
   padding: 0.72rem 0.95rem;
-  border: 1px solid rgba(10, 31, 20, 0.13);
+  border: 1px solid var(--line-strong);
   transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
 }
-.input::placeholder { color: #9aa8a0; }
-.input:hover { border-color: rgba(10, 31, 20, 0.24); }
+.input::placeholder { color: var(--ink-faint); }
+.input:hover { border-color: var(--ink-faint); }
 .input:focus {
   border-color: var(--brand-500);
   box-shadow: 0 0 0 3.5px rgba(18, 183, 106, 0.14);
@@ -354,12 +410,12 @@ body {
 
 /* Selectable chip — used for the interest picker */
 .chip {
-  @apply inline-flex items-center gap-1.5 rounded-pill text-tiny font-medium bg-white text-ink-soft;
+  @apply inline-flex items-center gap-1.5 rounded-pill text-tiny font-medium bg-surface text-ink-soft;
   padding: 0.44rem 0.85rem;
-  border: 1px solid rgba(10, 31, 20, 0.13);
+  border: 1px solid var(--line-strong);
   transition: all 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.chip:hover { border-color: rgba(10,31,20,0.28); color: var(--ink); transform: translateY(-1px); }
+.chip:hover { border-color: var(--ink-faint); color: var(--ink); transform: translateY(-1px); }
 .chip-active {
   background-image: linear-gradient(135deg, #12b76a 0%, #027a48 100%);
   border-color: transparent;
@@ -372,7 +428,7 @@ body {
 .pill {
   @apply inline-flex items-center gap-1.5 rounded-pill text-tiny font-medium;
   padding: 0.34rem 0.75rem;
-  background: #f7faf8;
+  background: var(--surface-tint);
   border: 1px solid var(--line);
   color: var(--ink-soft);
 }
@@ -392,7 +448,7 @@ body {
 /* Divider with a soft fade at both ends */
 .rule {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(10,31,20,0.13) 18%, rgba(10,31,20,0.13) 82%, transparent);
+  background: linear-gradient(to right, transparent, var(--line-strong) 18%, var(--line-strong) 82%, transparent);
   border: 0;
 }
 

@@ -118,7 +118,7 @@ const TripForm = () => {
                   onClick={() => stepDays(-1)}
                   disabled={Number(formData.days) <= 1}
                   aria-label="Decrease duration by one day"
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-line bg-white text-ink-soft transition-all duration-base hover:border-line-strong hover:text-ink disabled:opacity-40"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-line bg-surface text-ink-soft transition-all duration-base hover:border-line-strong hover:text-ink disabled:opacity-40"
                 >
                   <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -143,7 +143,7 @@ const TripForm = () => {
                   onClick={() => stepDays(1)}
                   disabled={Number(formData.days) >= 30}
                   aria-label="Increase duration by one day"
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-line bg-white text-ink-soft transition-all duration-base hover:border-line-strong hover:text-ink disabled:opacity-40"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-line bg-surface text-ink-soft transition-all duration-base hover:border-line-strong hover:text-ink disabled:opacity-40"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -183,7 +183,7 @@ const TripForm = () => {
                       'rounded-pill border px-2.5 py-1 text-caption font-semibold transition-all duration-base',
                       Number(formData.budget) === b
                         ? 'border-amber-500/30 bg-amber-500/12 text-amber-700'
-                        : 'border-line bg-white text-ink-muted hover:border-line-strong hover:text-ink'
+                        : 'border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink'
                     )}
                   >
                     ${b.toLocaleString()}

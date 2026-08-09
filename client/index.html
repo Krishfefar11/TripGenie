@@ -2,7 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Sets the theme class before first paint, synchronously, so there's
+         no flash of the wrong theme while React hydrates. Stored preference
+         wins; otherwise falls back to the OS-level setting. -->
+    <script>
+      (function () {
+        var stored = localStorage.getItem('tripgenie-theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+
+    <!-- Favicon: SVG primary (scales cleanly, matches the live brand mark
+         exactly), ICO/PNG fallbacks for browsers/platforms that need a
+         raster format (older Safari/Windows, Apple touch icon). -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TripGenie – AI Travel Planner</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,8 +30,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <meta name="description" content="TripGenie — AI travel planning grounded in real travel guides. Get budget-aware, day-by-day itineraries built from genuine sources, not guesswork." />
     <meta name="theme-color" content="#0a1f14" />
+
+    <!-- Open Graph / social preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TripGenie" />
+    <meta property="og:title" content="TripGenie — Travel plans that cite their sources" />
+    <meta property="og:description" content="AI itineraries grounded in real travel guides — hybrid retrieval, cross-encoder reranking, and a live route map. Not a prompt wrapper." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TripGenie — Travel plans that cite their sources" />
+    <meta name="twitter:description" content="AI itineraries grounded in real travel guides — hybrid retrieval, cross-encoder reranking, and a live route map." />
+    <meta name="twitter:image" content="/og-image.png" />
   </head>
-  <body class="bg-white text-ink overflow-x-hidden">
+  <body class="overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

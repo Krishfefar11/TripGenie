@@ -79,7 +79,7 @@ const ChatInterface = ({ injectedMessage = '', onInjectedMessageUsed }) => {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-surface">
       {/* ── Messages ── */}
       <div
         ref={scrollRef}
@@ -166,9 +166,9 @@ const ChatInterface = ({ injectedMessage = '', onInjectedMessageUsed }) => {
       </div>
 
       {/* ── Composer ── */}
-      <div className="border-t border-line bg-white px-4 py-4 sm:px-6">
+      <div className="border-t border-line bg-surface px-4 py-4 sm:px-6">
         <form onSubmit={handleSend}>
-          <div className="flex items-end gap-2.5 rounded-lg border border-line bg-surface-sunken p-2 transition-all duration-base focus-within:border-brand-500 focus-within:bg-white focus-within:shadow-[0_0_0_3.5px_rgba(18,183,106,0.12)]">
+          <div className="flex items-end gap-2.5 rounded-lg border border-line bg-surface-sunken p-2 transition-all duration-base focus-within:border-brand-500 focus-within:bg-surface focus-within:shadow-[0_0_0_3.5px_rgba(18,183,106,0.12)]">
             <textarea
               ref={inputRef}
               value={input}
@@ -190,9 +190,9 @@ const ChatInterface = ({ injectedMessage = '', onInjectedMessageUsed }) => {
           </div>
         </form>
         <p className="mt-2.5 text-center text-caption text-ink-faint">
-          <kbd className="rounded-xs border border-line bg-white px-1.5 py-0.5 font-mono text-[0.625rem]">Enter</kbd>
+          <kbd className="rounded-xs border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.625rem]">Enter</kbd>
           {' '}to send ·{' '}
-          <kbd className="rounded-xs border border-line bg-white px-1.5 py-0.5 font-mono text-[0.625rem]">Shift + Enter</kbd>
+          <kbd className="rounded-xs border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.625rem]">Shift + Enter</kbd>
           {' '}for a new line
         </p>
       </div>

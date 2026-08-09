@@ -5,6 +5,7 @@ import {
   Utensils, Camera, CloudSun, Briefcase, Star, Sparkles, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import ItineraryCard from '../components/ItineraryCard';
+import TripMap from '../components/TripMap';
 import BudgetBreakdown from '../components/BudgetBreakdown';
 import PackingList from '../components/PackingList';
 import TravelTips from '../components/TravelTips';
@@ -13,6 +14,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import IconBadge from '../components/ui/IconBadge';
 import { Reveal, Stagger, StaggerItem } from '../components/ui/Reveal';
 import { tripService } from '../services/api';
+import { useDestinationImage } from '../utils/useDestinationImage';
 
 const ItineraryPage = () => {
   const location = useLocation();
@@ -48,6 +50,11 @@ const ItineraryPage = () => {
 
   const handleDownloadPDF = () => window.print();
 
+  // Called unconditionally (before the loading early-return below) — every
+  // hook in a component must run on every render, or React loses track of
+  // hook order between renders and throws.
+  const destinationImage = useDestinationImage(data?.destination);
+
   if (loading) {
     return <LoadingSpinner message="Finalizing your itinerary…" sub="Assembling the day-by-day plan." />;
   }
@@ -55,7 +62,7 @@ const ItineraryPage = () => {
   const {
     destination, summary, itinerary, budgetBreakdown, travelTips, packingList,
     localFood, lessCrowdedPlaces, weatherInfo, days, budget: totalBudget,
-    retrievedSources,
+    retrievedSources, destinationCoords,
   } = data;
   const isGrounded = retrievedSources > 0;
 
@@ -64,6 +71,19 @@ const ItineraryPage = () => {
 
       {/* ═══════════════ HEADER BAND ═══════════════ */}
       <section className="relative isolate overflow-hidden bg-mesh">
+        {/* Real destination photo, faded in once resolved. Same safe pattern
+            as the homepage hero: heavy light scrim on top, so the existing
+            dark header text never has to change color or risk contrast. */}
+        {destinationImage && (
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <img
+              src={destinationImage}
+              alt=""
+              className="h-full w-full animate-fade-in object-cover grayscale-[15%]"
+            />
+            <div className="absolute inset-0 bg-surface/[0.86] dark:bg-surface/[0.94]" />
+          </div>
+        )}
         <div className="absolute inset-0 bg-grid" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-wide px-5 pb-12 pt-8 sm:px-8 sm:pb-14 sm:pt-10">
@@ -79,12 +99,12 @@ const ItineraryPage = () => {
             <div className="min-w-0">
               <Reveal>
                 {isGrounded ? (
-                  <span className="eyebrow rounded-pill border border-brand-500/18 bg-white/70 px-3 py-1.5 backdrop-blur">
+                  <span className="eyebrow rounded-pill border border-brand-500/18 bg-surface/70 px-3 py-1.5 backdrop-blur dark:bg-surface/90">
                     <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                     Grounded in {retrievedSources} retrieved source{retrievedSources === 1 ? '' : 's'}
                   </span>
                 ) : (
-                  <span className="eyebrow rounded-pill border border-ink-faint/25 bg-white/70 px-3 py-1.5 text-ink-muted backdrop-blur">
+                  <span className="eyebrow rounded-pill border border-ink-faint/25 bg-surface/70 px-3 py-1.5 text-ink-muted backdrop-blur dark:bg-surface/90">
                     <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
                     No matching guide in corpus — built from general knowledge
                   </span>
@@ -149,6 +169,12 @@ const ItineraryPage = () => {
             </Reveal>
           </div>
         </div>
+
+        {destinationImage && (
+          <p className="relative px-5 pb-2 text-right text-[0.625rem] text-ink-faint/70 sm:px-8 print:hidden">
+            Photo via Wikipedia
+          </p>
+        )}
       </section>
 
       {/* ═══════════════ SUMMARY ═══════════════ */}
@@ -165,6 +191,15 @@ const ItineraryPage = () => {
                 </div>
               </div>
             </div>
+          </Reveal>
+        </section>
+      )}
+
+      {/* ═══════════════ MAP ═══════════════ */}
+      {Array.isArray(itinerary) && itinerary.some((d) => d.coords) && (
+        <section className="mx-auto max-w-wide px-5 pt-10 sm:px-8 print:hidden">
+          <Reveal direction="up">
+            <TripMap days={itinerary} destinationCoords={destinationCoords} />
           </Reveal>
         </section>
       )}

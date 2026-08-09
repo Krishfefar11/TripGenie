@@ -48,6 +48,10 @@ everything else:
 | Scroll progress bar | `client/src/components/ui/ScrollProgress.jsx` |
 | Footer | `client/src/components/Footer.jsx` |
 | `cn()` class merge helper | `client/src/utils/cn.js` |
+| Hero background photo carousel | `client/src/components/ui/HeroBackdrop.jsx` |
+| Per-destination photo fetch (Wikipedia) | `client/src/utils/useDestinationImage.js` |
+| Itinerary route map | `client/src/components/TripMap.jsx` |
+| Server-side geocoding (Nominatim) | `server/services/geocodeService.js` |
 
 ### Component vocabulary
 
@@ -178,3 +182,132 @@ hot reload in this project — a recurring issue across every redesign here).
   summary panel renders empty quotes. Pre-existing data shape issue in what
   gets persisted on save — **not** introduced by this redesign, and not fixed
   here since it's a backend/persistence concern rather than a design one.
+
+---
+
+## 5. Real imagery and the itinerary map
+
+Added after a second round of feedback: Aurora had zero photographic imagery
+and no map, despite being a travel product. This section covers both —
+implemented with free, keyless data sources rather than a paid image/maps API,
+so the project still runs with nothing but the existing Groq/Gemini keys.
+
+Also removed in this pass: the homepage's **Capabilities** (bento grid) and
+**Reception** (testimonials) sections, at the user's request — cut cleanly,
+including their now-orphaned `TESTIMONIALS` data and `Quote` icon import.
+
+### Hero photo carousel — `HeroBackdrop.jsx`
+
+Six real photos (Rome, Tokyo, Paris, Bali, Bangkok, New York — matching the
+RAG corpus exactly) from Wikimedia Commons, crossfading behind the existing
+`bg-mesh`/`bg-grid` layers at low opacity (a `bg-white/[0.86]` scrim). This is
+deliberately texture, not a loud photo banner: hero text contrast never
+depends on which of the six frames happens to be showing, because the scrim
+dominates regardless. All six URLs were verified to resolve (200, correct
+content-type) before hardcoding.
+
+Crossfade is a single 36s CSS keyframe (`animate-hero-crossfade`) shared by
+all six images, each offset by `animation-delay: {i * 6}s` — one image visible
+at a time, brief overlap at the edges. Uses `fill-mode: both` so an image
+doesn't flash fully-visible during its own delay before its first turn (same
+technique already used by `fade-up`/`bar-grow`). No extra reduced-motion rule
+was needed: the project's existing global `prefers-reduced-motion` block
+already collapses all animation durations to ~0ms, which lands every image on
+its keyframe's final (invisible) frame — the backdrop just settles to plain
+`bg-mesh`, correctly.
+
+Small attribution line ("Photos: {credits} · Wikimedia Commons") in the
+hero's bottom-right corner — required by the Commons licenses on these
+specific photos, not optional decoration.
+
+### Destination photo — `useDestinationImage.js` + `ItineraryPage`
+
+Fetches a real photo for the *generated* destination (arbitrary user input,
+not a fixed set) from Wikipedia's REST summary API, client-side, no API key.
+Verified directly that its title-matching already handles real-world typos —
+the exact "ahemdabad" input from earlier this session resolves to Ahmedabad's
+photo. Same safe scrim treatment as the hero backdrop, so it's a drop-in reuse
+of a pattern rather than a new risk. Fails silently (no image, no error) when
+a destination has no matching Wikipedia page; the header just stays on plain
+`bg-mesh`.
+
+**Scope call:** the second ask was photos on individual day cards, tied to
+each retrieved place. Not implemented — most itinerary line items (a specific
+restaurant, a specific street) don't have their own Wikipedia page, so
+per-line-item lookups would fail far more often than they'd succeed, leaving
+scattered broken/missing images across the day cards. One reliable
+destination-level photo beats several unreliable landmark-level ones.
+
+### Itinerary map — `geocodeService.js` + `TripMap.jsx`
+
+The itinerary JSON schema (`buildItineraryPrompt` in `ragPipeline.js`) now
+asks the LLM for one extra field per day: `mapQuery`, a short real place name
+("Colosseum, Rome") the LLM already effectively knows since it just named
+that landmark in the day's text. After parsing, each day's `mapQuery` is
+geocoded server-side via Nominatim (OpenStreetMap's free geocoder — no key).
+
+Nominatim's usage policy caps its public instance at 1 request/second and
+requires an identifying `User-Agent`; calls are sequential with ~1.1s spacing,
+not parallel, to actually respect that rather than risk the shared IP getting
+blocked. Trips are capped at the first 14 days for geocoding — no itinerary
+in practice gets close to that, and it bounds worst-case added latency.
+
+Two reliability details found by testing real queries, not assumed:
+- **"Vatican Museums, Rome" returned zero Nominatim results; "Vatican
+  Museums" alone returned a correct match.** A city qualifier can
+  over-constrain the free-text search. So a failed lookup retries once on
+  just the part before the first comma before giving up.
+- **If both attempts fail, the day still gets a marker** — placed at the
+  destination's own coordinates with a small deterministic offset (golden-
+  angle spiral) so multiple fallback markers fan out instead of stacking
+  exactly on top of each other. Flagged internally via `coordsApproximate`.
+
+`TripMap.jsx` renders via `react-leaflet` (v4, not v5 — v5 requires React 19
+and this project is on React 18.3; installed the matching major version
+rather than forcing an incompatible peer dep). Markers are custom numbered
+`L.divIcon`s reusing the exact classes from `ItineraryCard`'s day-node badge
+(`bg-grad-brand`, white bold number), not Leaflet's default marker image —
+which sidesteps a well-known Leaflet+bundler issue where the default icon's
+relative URLs don't resolve under Vite. A route polyline connects the markers
+in day order. Tiles are plain OpenStreetMap with required attribution.
+
+**Persistence gap found and fixed:** `Trip.js`'s Mongoose schema stores
+`itinerary` as `Mixed`, so per-day `coords` survive save/reload automatically.
+But the new top-level `destinationCoords` field was silently dropped on save
+— Mongoose strips undeclared top-level fields, and `tripController.js`
+explicitly whitelists which `req.body` fields it reads. Both the schema and
+the controller's destructure needed the new field added. Verified with a real
+save → fetch round-trip (Bangkok, both `destinationCoords` and per-day
+`coords` came back intact) rather than assumed from reading the code.
+
+### Bug found during verification
+
+**Rules of Hooks violation, `ItineraryPage.jsx`.** `useDestinationImage()`
+was first added *after* the component's `if (loading) return <LoadingSpinner
+/>` early return. On the first render (`loading === true`) that hook call
+never executes; once data arrives and `loading` flips to `false`, a re-render
+reaches it for the first time — React sees a different number of hooks
+between renders and throws `Rendered more hooks than during the previous
+render`. Caught live in the browser console, not in code review. Fixed by
+moving the hook above the early return, called unconditionally every render
+with `data?.destination` (safe pre-load, since the hook itself no-ops on a
+falsy destination).
+
+### Verification
+
+- Hero backdrop: visually confirmed in-browser — a real cityscape photo
+  visible at low opacity behind the hero copy, text fully legible, crossfade
+  advances over time.
+- Destination photo: visually confirmed on a live Rome generation — real
+  building photo, "Photo via Wikipedia" credit visible.
+- Map: DOM-verified rather than screenshot-only (the preview pane's
+  screenshot pipeline was unreliable this session) — `12/12` tiles loaded and
+  `3/3` numbered markers present for a 3-day Rome trip on desktop; `6/6`
+  tiles and `2/2` markers for a 2-day Bangkok trip on a 375px mobile
+  viewport, with no horizontal page overflow.
+- Persistence: real save → fetch round-trip confirmed both `destinationCoords`
+  and per-day `coords` survive intact.
+- `vite build`: passes clean (600.8 kB JS / 187.4 kB gzip, 72.4 kB CSS / 17.4 kB
+  gzip — the size jump from ~440 kB is `leaflet` + `react-leaflet`; not code-
+  split, since this app doesn't route-split anything else either).
+- Console: clean after the Rules of Hooks fix.

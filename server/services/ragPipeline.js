@@ -12,6 +12,7 @@ const { generateEmbedding } = require('./embeddingService');
 const { searchHybrid } = require('./hybridSearch');
 const { rerank } = require('./rerankService');
 const { generateWithOllama } = require('./ollamaService');
+const { geocodeItinerary } = require('./geocodeService');
 const { calculateBudgetBreakdown } = require('../utils/budgetUtils');
 const { getWeatherInfo } = require('../utils/weatherUtils');
 const { repairJson } = require('../utils/jsonFixer');
@@ -60,7 +61,8 @@ CRITICAL INSTRUCTIONS:
 3. FACTUAL ACCURACY: Ensure restaurants and spots are correctly located. ALERT: Avoid recommending ultra-luxury restaurants (like Michelin-starred ones) for budget/moderate trips unless they have a known affordable takeaway/cafe.
 4. BUDGET ALIGNMENT: The "estimatedCost" for each day should covers ONLY activities and admissions (not food/hotel). It MUST stay close to the "Activities & Admissions" allocation ($${budgetBreakdown?.perDayBreakdown?.activities || 'budget-appropriate'}/day).
 5. SPECIFICITY: Name specific streets, specific dishes, and specific times.
-6. FORMAT: Respond ONLY with valid JSON. No conversational filler.
+6. MAP QUERY: "mapQuery" must be a short, real, geocodable string for that day's primary area — a landmark or neighborhood name plus the city, e.g. "Colosseum, Rome" or "Shibuya, Tokyo". It gets passed directly to a geocoder, so it must name a real, mappable place, never something vague like "city center" or "local market".
+7. FORMAT: Respond ONLY with valid JSON. No conversational filler.
 
 RESPONSE FORMAT (STRICT JSON ONLY):
 {
@@ -73,7 +75,8 @@ RESPONSE FORMAT (STRICT JSON ONLY):
       "morning": "Specific activity with location",
       "afternoon": "Specific activity with location",
       "evening": "Specific activity with location (dinner spot name)",
-      "estimatedCost": number
+      "estimatedCost": number,
+      "mapQuery": "Short geocodable place name, e.g. 'Colosseum, Rome'"
     }
   ],
   "travelTips": ["Tip 1", "Tip 2"],
@@ -120,8 +123,9 @@ async function generateItinerary(params) {
 
   console.log(`\n🧞 Generating itinerary for ${destination} (${days} days, $${budget})${mediaContext ? ' [with uploaded media context]' : ''}`);
 
-  // Step 1: Calculate preliminary budget breakdown
-  const budgetBreakdown = calculateBudgetBreakdown(budget, days);
+  // Step 1: Calculate preliminary budget breakdown, adjusted for the
+  // destination's relative cost of living
+  const budgetBreakdown = calculateBudgetBreakdown(budget, days, destination);
 
   // Step 2: Generate embedding for the search query — folding in media context
   // so retrieval can surface corpus chunks about a place identified in the upload.
@@ -195,8 +199,23 @@ async function generateItinerary(params) {
   // Step 7: Enhance with final data
   const weatherInfo = getWeatherInfo(destination);
 
+  // Step 8: Geocode each day's mapQuery for the itinerary map. Runs after
+  // parsing so a bad/missing LLM field just means one fewer marker, never
+  // a failed generation.
+  let geocodedDays = itineraryData.itinerary;
+  let destinationCoords = null;
+  if (Array.isArray(itineraryData.itinerary) && itineraryData.itinerary.length > 0) {
+    console.log(`📍 Geocoding ${Math.min(itineraryData.itinerary.length, 14)} day location(s)...`);
+    const geocoded = await geocodeItinerary(itineraryData.itinerary, itineraryData.destination || destination);
+    geocodedDays = geocoded.days;
+    destinationCoords = geocoded.destinationCoords;
+    console.log(`📍 Geocoded ${geocodedDays.filter((d) => d.coords).length}/${geocodedDays.length} days`);
+  }
+
   return {
     ...itineraryData,
+    itinerary: geocodedDays,
+    destinationCoords,
     budgetBreakdown,
     weatherInfo,
     destination: itineraryData.destination || destination,

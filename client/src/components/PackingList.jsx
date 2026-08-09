@@ -65,7 +65,7 @@ const PackingList = ({ items }) => {
                     'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border transition-all duration-base',
                     isPacked
                       ? 'border-transparent bg-grad-brand text-white'
-                      : 'border-line-strong bg-white group-hover:border-brand-400'
+                      : 'border-line-strong bg-surface group-hover:border-brand-400'
                   )}
                 >
                   <Check

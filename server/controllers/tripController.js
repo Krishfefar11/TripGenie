@@ -16,7 +16,7 @@ async function saveTrip(req, res) {
       destination, days, budget, interests,
       itinerary, budgetBreakdown,
       travelTips, packingList, localFood,
-      lessCrowdedPlaces, weatherInfo,
+      lessCrowdedPlaces, weatherInfo, destinationCoords,
     } = req.body;
 
     if (!destination || !itinerary) {
@@ -35,6 +35,7 @@ async function saveTrip(req, res) {
       localFood,
       lessCrowdedPlaces,
       weatherInfo,
+      destinationCoords,
     });
 
     console.log(`💾 Saved trip: ${destination} (${days} days)`);

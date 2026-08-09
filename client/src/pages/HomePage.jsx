@@ -1,14 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Sparkles, ArrowRight, ArrowUpRight, Database, Layers, Wallet, MessageSquare,
   ImagePlus, Search, Star, Clock, MapPin, Sunrise, Sun, Moon,
   ShieldCheck, Zap, FileText, CheckCircle2, Utensils, TrendingUp,
+  HelpCircle, Plus, Minus, Compass,
 } from 'lucide-react';
 import TripForm from '../components/TripForm';
 import { Reveal, Stagger, StaggerItem } from '../components/ui/Reveal';
 import SectionHeading from '../components/ui/SectionHeading';
 import IconBadge from '../components/ui/IconBadge';
+import HeroBackdrop from '../components/ui/HeroBackdrop';
+import { EXAMPLE_ITINERARIES } from '../data/exampleItineraries';
 
 /* ── Content ─────────────────────────────────────────────────────────── */
 
@@ -42,15 +45,64 @@ const HOW_STEPS = [
   },
 ];
 
-const SAMPLE_DAY = [
-  { part: 'Morning',   icon: Sunrise, tint: 'amber',  text: 'Timed-entry combo ticket to the Colosseum and Roman Forum (Via dei Fori Imperiali).' },
-  { part: 'Afternoon', icon: Sun,     tint: 'sky',    text: 'Aventine Hill keyhole view of St. Peter’s dome at the Priory of the Knights of Malta.' },
-  { part: 'Evening',   icon: Moon,    tint: 'violet', text: 'Porchetta sandwich at the Trastevere night-market food stalls (Piazza di Santa Maria).' },
+const FAQS = [
+  {
+    q: 'Is this really RAG, or just a prompt wrapper around an LLM?',
+    a: 'Real retrieval. Destination guides are chunked, embedded locally, and searched with a hybrid of BM25 keyword matching and dense vector similarity, merged by Reciprocal Rank Fusion — then a cross-encoder reranks the fused candidates before anything reaches the LLM. Measured against an 18-query labeled eval set: MRR@5 went from 0.944 (vector-only) to 0.972 (hybrid + rerank). A prompt wrapper has none of that — it\'s just the model\'s training data and whatever you typed.',
+  },
+  {
+    q: 'What happens if the LLM API is down?',
+    a: 'It fails over rather than failing. The generation call tries Groq first, then Gemini, then a local Ollama instance if one\'s running, then a templated fallback as the last resort — so a single provider outage doesn\'t take the whole app down. You can see which backend answered in the server logs on every request.',
+  },
+  {
+    q: 'How do you stop it from just making up landmarks?',
+    a: 'Retrieved passages are scored for relevance before they\'re used — if nothing in the corpus actually matches your destination, the retrieved-context block is dropped entirely and the itinerary page says so explicitly ("No matching guide in corpus — built from general knowledge") instead of quietly padding the answer with irrelevant places from other cities.',
+  },
+  {
+    q: 'Where does the map data come from?',
+    a: 'Each day\'s primary location is geocoded through OpenStreetMap\'s free Nominatim service — no Google Maps key, no paid API. The route line and numbered pins you see on a generated itinerary are real coordinates, not illustrative placeholders.',
+  },
+  {
+    q: 'Is my data stored anywhere?',
+    a: 'Embeddings are generated locally, not sent to a third-party vector API. Saving a trip writes it to MongoDB with no account or signup required. The one exception: if you upload a photo or video for the vision feature, that file is sent to Gemini for analysis — that\'s the only step that leaves this app\'s own infrastructure.',
+  },
+  {
+    q: 'How many destinations does it actually know?',
+    a: 'The retrieval corpus currently has 6 full destination guides (Rome, Tokyo, Paris, Bali, Bangkok, New York). Ask for anywhere else and you\'ll get an honest, clearly-labeled general-knowledge itinerary instead of a fabricated "grounded" one — see the badge at the top of any generated trip.',
+  },
+];
+
+// Fixed per time-of-day slot regardless of which example is showing, so the
+// icon language stays consistent as the card rotates.
+const TIME_SLOTS = [
+  { part: 'Morning',   key: 'morning',   icon: Sunrise, tint: 'amber' },
+  { part: 'Afternoon', key: 'afternoon', icon: Sun,     tint: 'sky' },
+  { part: 'Evening',   key: 'evening',   icon: Moon,    tint: 'violet' },
 ];
 
 /* ── Hero visual: a floating itinerary preview card ───────────────────── */
+// Rotates through the same real, pre-generated examples as the gallery
+// below — not one static Rome card forever. Content swap is a React state
+// change + a CSS opacity fade-in on remount (via `key`), no JS-interpolated
+// values, so a stalled interval just leaves the last example showing
+// instead of a broken half-transition.
 
 const HeroPreview = () => {
+  const navigate = useNavigate();
+  const [index, setIndex] = useState(0);
+
+  React.useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % EXAMPLE_ITINERARIES.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
+
+  const example = EXAMPLE_ITINERARIES[index];
+  const { data } = example;
+  const day1 = data.itinerary?.[0];
+
   return (
     <div className="relative mx-auto w-full max-w-[430px] lg:max-w-none">
       {/* Glow behind the card */}
@@ -58,60 +110,84 @@ const HeroPreview = () => {
       <div className="orb -bottom-12 -left-10 h-56 w-56 bg-indigo-500/20" aria-hidden="true" />
 
       <div
-        className="card-gradient relative animate-fade-up overflow-hidden rounded-xl p-5 sm:p-6"
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate('/itinerary', { state: { itinerary: data } })}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            navigate('/itinerary', { state: { itinerary: data } });
+          }
+        }}
+        aria-label={`View the full example itinerary for ${example.label}`}
+        className="card-gradient relative block w-full animate-fade-up cursor-pointer overflow-hidden rounded-xl p-5 text-left sm:p-6"
         style={{ animationDelay: '280ms' }}
       >
-        {/* Window chrome */}
-        <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <IconBadge icon={MapPin} accent="brand" size="sm" />
-            <div>
-              <p className="text-h3 leading-tight text-ink">Rome, Italy</p>
-              <p className="caption-meta mt-0.5">3 days · $1,000</p>
+        <div key={index} className="animate-fade-in">
+          {/* Window chrome */}
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <IconBadge icon={MapPin} accent={example.accent} size="sm" />
+              <div>
+                <p className="text-h3 leading-tight text-ink">{example.label}</p>
+                <p className="caption-meta mt-0.5">{data.days} days · ${data.budget?.toLocaleString()}</p>
+              </div>
             </div>
-          </div>
-          <span className="pill border-brand-500/20 bg-brand-500/10 text-brand-700">
-            <span className="status-dot bg-brand-500" aria-hidden="true" />
-            AI Generated
-          </span>
-        </div>
-
-        {/* Day 1 timeline */}
-        <div className="card-sunken rounded-md p-4">
-          <div className="mb-3.5 flex items-center justify-between">
-            <span className="inline-flex items-center gap-2 text-tiny font-semibold text-ink">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-xs bg-grad-brand text-[0.625rem] font-bold text-white">
-                1
-              </span>
-              Imperial Foundations
+            <span className="pill border-brand-500/20 bg-brand-500/10 text-brand-700">
+              <span className="status-dot bg-brand-500" aria-hidden="true" />
+              AI Generated
             </span>
-            <span className="data-num text-caption text-ink-muted">EST. $17</span>
           </div>
 
-          <ul className="space-y-3">
-            {SAMPLE_DAY.map(({ part, icon: Icon, tint, text }, i) => (
-              <li
-                key={part}
-                className="flex animate-fade-up gap-2.5"
-                style={{ animationDelay: `${420 + i * 110}ms` }}
-              >
-                <IconBadge icon={Icon} accent={tint} variant="tint" size="xs" lift={false} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-caption uppercase text-ink-muted">{part}</p>
-                  <p className="mt-0.5 text-tiny leading-relaxed text-ink-soft">{text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {/* Day 1 timeline */}
+          {day1 && (
+            <div className="card-sunken rounded-md p-4">
+              <div className="mb-3.5 flex items-center justify-between">
+                <span className="inline-flex items-center gap-2 text-tiny font-semibold text-ink">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-xs bg-grad-brand text-[0.625rem] font-bold text-white">
+                    1
+                  </span>
+                  {day1.title}
+                </span>
+                <span className="data-num text-caption text-ink-muted">EST. ${day1.estimatedCost}</span>
+              </div>
+
+              <ul className="space-y-3">
+                {TIME_SLOTS.map(({ part, key, icon: Icon, tint }, i) => (
+                  <li
+                    key={part}
+                    className="flex animate-fade-up gap-2.5"
+                    style={{ animationDelay: `${420 + i * 110}ms` }}
+                  >
+                    <IconBadge icon={Icon} accent={tint} variant="tint" size="xs" lift={false} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-caption uppercase text-ink-muted">{part}</p>
+                      <p className="mt-0.5 text-tiny leading-relaxed text-ink-soft line-clamp-2">{day1[key]}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Retrieval provenance — the RAG proof, shown not told */}
+          <div className="mt-4 flex items-center gap-2 rounded-md border border-indigo-500/16 bg-indigo-500/[0.055] px-3 py-2.5">
+            <Database className="h-3.5 w-3.5 shrink-0 text-indigo-600" aria-hidden="true" />
+            <p className="text-caption leading-snug text-ink-soft">
+              Grounded in <span className="font-semibold text-indigo-700">{data.retrievedSources} retrieved passage{data.retrievedSources === 1 ? '' : 's'}</span> from
+              {' '}<span className="font-mono text-[0.6875rem]">{example.key}-guide.txt</span>
+            </p>
+          </div>
         </div>
 
-        {/* Retrieval provenance — the RAG proof, shown not told */}
-        <div className="mt-4 flex items-center gap-2 rounded-md border border-indigo-500/16 bg-indigo-500/[0.055] px-3 py-2.5">
-          <Database className="h-3.5 w-3.5 shrink-0 text-indigo-600" aria-hidden="true" />
-          <p className="text-caption leading-snug text-ink-soft">
-            Grounded in <span className="font-semibold text-indigo-700">5 retrieved passages</span> from
-            {' '}<span className="font-mono text-[0.6875rem]">rome-guide.txt</span>
-          </p>
+        {/* Rotation indicator — small, quiet, tells you this card is alive */}
+        <div className="mt-4 flex items-center justify-center gap-1.5" aria-hidden="true">
+          {EXAMPLE_ITINERARIES.map((e, i) => (
+            <span
+              key={e.key}
+              className={`h-1.5 rounded-pill transition-all duration-slow ${i === index ? 'w-5 bg-brand-500' : 'w-1.5 bg-ink-faint/40'}`}
+            />
+          ))}
         </div>
       </div>
 
@@ -138,11 +214,28 @@ const HeroPreview = () => {
 /* ── Page ────────────────────────────────────────────────────────────── */
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const openExample = (example) => navigate('/itinerary', { state: { itinerary: example.data } });
+
+  // Tracks which FAQ items are expanded, purely for the chevron's rotation.
+  // The disclosure itself is native <details>/<summary> — this state never
+  // gates content visibility, only a decorative icon.
+  const [openFaqs, setOpenFaqs] = useState(() => new Set());
+  const handleFaqToggle = (question) => (e) => {
+    setOpenFaqs((prev) => {
+      const next = new Set(prev);
+      if (e.target.open) next.add(question);
+      else next.delete(question);
+      return next;
+    });
+  };
+
   return (
     <div className="overflow-x-clip">
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative isolate overflow-hidden bg-mesh">
+        <HeroBackdrop />
         <div className="absolute inset-0 bg-grid" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-shell px-5 pb-20 pt-14 sm:px-8 sm:pt-20 lg:pb-28 lg:pt-24">
@@ -153,7 +246,7 @@ const HomePage = () => {
                 needs JavaScript to become visible is a hero that renders blank
                 whenever rAF is throttled or a script fails. */}
             <div className="text-center lg:text-left">
-              <div className="inline-flex animate-fade-up items-center gap-2 rounded-pill border border-brand-500/18 bg-white/70 py-1.5 pl-1.5 pr-3.5 shadow-xs backdrop-blur">
+              <div className="inline-flex animate-fade-up items-center gap-2 rounded-pill border border-brand-500/18 bg-surface/70 py-1.5 pl-1.5 pr-3.5 shadow-xs backdrop-blur dark:bg-surface/90">
                 <span className="inline-flex items-center gap-1 rounded-pill bg-grad-brand px-2 py-0.5 text-caption font-bold text-white">
                   <Sparkles className="h-3 w-3" aria-hidden="true" />
                   RAG
@@ -221,7 +314,7 @@ const HomePage = () => {
         </div>
 
         {/* Stat strip — seals the hero, bridges into the next band */}
-        <div className="relative border-y border-line bg-white/55 backdrop-blur-sm">
+        <div className="relative border-y border-line bg-surface/55 backdrop-blur-sm">
           <div className="mx-auto max-w-shell px-5 sm:px-8">
             <Stagger className="grid grid-cols-2 divide-line md:grid-cols-4 md:divide-x" gap={0.07}>
               {TRUST_STATS.map((s) => (
@@ -235,8 +328,78 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ═══════════════ EXAMPLE GALLERY ═══════════════ */}
+      <section className="relative overflow-hidden bg-mesh-soft py-20 sm:py-24">
+        <div className="mx-auto max-w-shell px-5 sm:px-8">
+          <SectionHeading
+            eyebrow="Try it now"
+            eyebrowIcon={Compass}
+            title="See real output before you plan your own"
+            lead="Three itineraries generated for real by the pipeline above — hybrid retrieval, reranking, and live-geocoded routes. Click straight through, no form required."
+            className="mb-12"
+          />
+
+          <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" gap={0.08}>
+            {EXAMPLE_ITINERARIES.map((example) => {
+              const rail = {
+                brand: 'bg-grad-brand', rose: 'bg-grad-rose', teal: 'bg-grad-teal',
+              }[example.accent];
+              const day1 = example.data.itinerary?.[0];
+              return (
+                <StaggerItem key={example.key}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openExample(example)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openExample(example);
+                      }
+                    }}
+                    aria-label={`View example itinerary for ${example.label}`}
+                    className="card card-hover group relative flex h-full cursor-pointer flex-col overflow-hidden p-6"
+                  >
+                    <span className={`absolute inset-x-0 top-0 h-[3px] ${rail}`} aria-hidden="true" />
+
+                    <div className="flex items-start justify-between gap-3">
+                      <IconBadge icon={MapPin} accent={example.accent} size="md" />
+                      <span className="pill">
+                        <span className="data-num font-semibold">{example.data.days}</span> days
+                      </span>
+                    </div>
+
+                    <h3 className="mt-4 text-h2 text-ink">{example.label}</h3>
+                    <p className="mt-1.5 text-small text-ink-soft line-clamp-2">{example.data.summary}</p>
+
+                    {day1 && (
+                      <div className="mt-4 rounded-md border border-line bg-surface-sunken p-3.5">
+                        <p className="text-caption font-bold uppercase tracking-wide text-ink-muted">
+                          Day 1 · {day1.title}
+                        </p>
+                        <p className="mt-1 text-tiny leading-relaxed text-ink-soft line-clamp-2">
+                          {day1.morning}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-auto flex items-center justify-between pt-5">
+                      <span className="text-caption text-ink-faint">Pre-generated example</span>
+                      <span className="inline-flex items-center gap-1 text-tiny font-semibold text-brand-700">
+                        View example
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-base group-hover:translate-x-0.5" aria-hidden="true" />
+                      </span>
+                    </div>
+                  </div>
+                </StaggerItem>
+              );
+            })}
+          </Stagger>
+        </div>
+      </section>
+
       {/* ═══════════════ PLAN FORM ═══════════════ */}
-      <section id="plan" className="relative scroll-mt-24 bg-white py-20 sm:py-24">
+      <section id="plan" className="relative scroll-mt-24 bg-surface py-20 sm:py-24">
         <div className="mx-auto max-w-shell px-5 sm:px-8">
           <SectionHeading
             eyebrow="Start here"
@@ -300,7 +463,7 @@ const HomePage = () => {
       </section>
 
       {/* ═══════════════ SAMPLE OUTPUT — SHOW, DON'T TELL ═══════════════ */}
-      <section className="relative overflow-hidden bg-white py-20 sm:py-24">
+      <section className="relative overflow-hidden bg-surface py-20 sm:py-24">
         <div className="mx-auto max-w-shell px-5 sm:px-8">
           <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
 
@@ -412,8 +575,44 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ═══════════════ FAQ ═══════════════ */}
+      <section className="relative bg-surface py-20 sm:py-24">
+        <div className="mx-auto max-w-shell px-5 sm:px-8">
+          <SectionHeading
+            eyebrow="Questions"
+            eyebrowIcon={HelpCircle}
+            title="Straight answers, not marketing copy"
+            lead="Including the parts that are limitations, not just the parts that sound impressive."
+            className="mb-12"
+          />
+
+          <Stagger className="mx-auto max-w-prose space-y-3" gap={0.06}>
+            {FAQS.map((item) => (
+              <StaggerItem key={item.q}>
+                <details
+                  className="card overflow-hidden p-0"
+                  onToggle={handleFaqToggle(item.q)}
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-h3 text-ink marker:content-none [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    {openFaqs.has(item.q) ? (
+                      <Minus className="h-4.5 w-4.5 shrink-0 text-ink-muted" aria-hidden="true" />
+                    ) : (
+                      <Plus className="h-4.5 w-4.5 shrink-0 text-ink-muted" aria-hidden="true" />
+                    )}
+                  </summary>
+                  <p className="px-5 pb-5 text-body leading-relaxed text-ink-soft">
+                    {item.a}
+                  </p>
+                </details>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
       {/* ═══════════════ FINAL CTA ═══════════════ */}
-      <section className="relative bg-white py-20 sm:py-24">
+      <section className="relative bg-surface py-20 sm:py-24">
         <div className="mx-auto max-w-shell px-5 sm:px-8">
           <Reveal direction="up">
             <div className="relative overflow-hidden rounded-2xl bg-grad-ink bg-noise px-7 py-14 text-center sm:px-14 sm:py-18">

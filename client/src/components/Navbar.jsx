@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Compass, MessageSquare, Heart, Menu, X, Sparkles, ArrowUpRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { cn } from '../utils/cn';
+import ThemeToggle from './ui/ThemeToggle';
 
 const NAV_LINKS = [
   { name: 'Plan Trip',   path: '/',            icon: Compass },
@@ -46,7 +47,7 @@ const Navbar = () => {
           'fixed inset-x-0 top-0 z-50 print:hidden',
           'transition-all duration-slow ease-smooth',
           scrolled
-            ? 'border-b border-line bg-white/78 backdrop-blur-xl backdrop-saturate-150 shadow-sm'
+            ? 'border-b border-line bg-surface/78 backdrop-blur-xl backdrop-saturate-150 shadow-sm'
             : 'border-b border-transparent bg-transparent'
         )}
         style={{ height: 'var(--nav-h)' }}
@@ -103,7 +104,8 @@ const Navbar = () => {
           </nav>
 
           {/* ── Desktop CTA ── */}
-          <div className="hidden shrink-0 items-center gap-2 md:flex">
+          <div className="hidden shrink-0 items-center gap-2.5 md:flex">
+            <ThemeToggle />
             <Link to="/" className="btn-primary btn-sm">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               New Trip
@@ -112,15 +114,18 @@ const Navbar = () => {
           </div>
 
           {/* ── Mobile toggle ── */}
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-line bg-white text-ink-soft transition-colors duration-base hover:text-ink md:hidden"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-line bg-surface text-ink-soft transition-colors duration-base hover:text-ink"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -138,7 +143,7 @@ const Navbar = () => {
               aria-hidden="true"
             />
             <motion.nav
-              className="fixed inset-x-3 z-50 rounded-xl border border-line bg-white p-3 shadow-2xl md:hidden"
+              className="fixed inset-x-3 z-50 rounded-xl border border-line bg-surface p-3 shadow-2xl md:hidden"
               style={{ top: 'calc(var(--nav-h) + 6px)' }}
               initial={{ opacity: 0, y: -14, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

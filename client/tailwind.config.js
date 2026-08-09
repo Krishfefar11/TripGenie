@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -11,23 +12,28 @@ export default {
         // Brand identity stays: deep forest-green ink is still the anchor.
         // What's new is a full tonal ramp per accent so color can express
         // hierarchy (subtle tint → solid → deep) instead of one flat value.
+        // ink/surface/line resolve through CSS variables (defined in
+        // index.css) rather than literal hex, so a single `.dark` class on
+        // <html> can flip every `text-ink`/`bg-surface`/`border-line` usage
+        // across the whole app at once, instead of needing a `dark:` variant
+        // hand-added to every one of their hundreds of call sites.
         ink: {
-          DEFAULT: "#0a1f14",
-          soft: "#33463b",
-          muted: "#6b7d72",
-          faint: "#9aa8a0",
+          DEFAULT: "var(--ink)",
+          soft: "var(--ink-soft)",
+          muted: "var(--ink-muted)",
+          faint: "var(--ink-faint)",
         },
         surface: {
-          DEFAULT: "#ffffff",
-          sunken: "#f7faf8",
-          raised: "#ffffff",
-          tint: "#f0f7f3",
-          deep: "#06180f",
+          DEFAULT: "var(--surface)",
+          sunken: "var(--surface-sunken)",
+          raised: "var(--surface-raised)",
+          tint: "var(--surface-tint)",
+          deep: "var(--surface-deep)",
         },
         line: {
-          DEFAULT: "rgba(10,31,20,0.09)",
-          strong: "rgba(10,31,20,0.16)",
-          faint: "rgba(10,31,20,0.05)",
+          DEFAULT: "var(--line)",
+          strong: "var(--line-strong)",
+          faint: "var(--line-faint)",
         },
         // Primary brand accent — emerald/jade, ties to the forest-green ink
         brand: {
@@ -138,6 +144,15 @@ export default {
         sheen:       { "0%": { transform: "translateX(-120%)" }, "100%": { transform: "translateX(120%)" } },
         "dot-bounce":{ "0%,80%,100%": { transform: "translateY(0)", opacity: "0.45" }, "40%": { transform: "translateY(-5px)", opacity: "1" } },
         "bar-grow":  { "0%": { transform: "scaleX(0)" }, "100%": { transform: "scaleX(1)" } },
+        // 6 images share one 36s loop, each offset by animation-delay so
+        // exactly one is visible (~5s) at a time with a brief crossfade.
+        "hero-crossfade": {
+          "0%":   { opacity: "0" },
+          "2%":   { opacity: "1" },
+          "14%":  { opacity: "1" },
+          "17%":  { opacity: "0" },
+          "100%": { opacity: "0" },
+        },
       },
       animation: {
         // `both` fill-mode: holds the hidden 0% during animation-delay and the
@@ -154,6 +169,10 @@ export default {
         sheen: "sheen 1.5s cubic-bezier(0.22,1,0.36,1)",
         "dot-bounce": "dot-bounce 1.3s ease-in-out infinite",
         "bar-grow": "bar-grow 0.85s cubic-bezier(0.22,1,0.36,1) both",
+        // `both`: holds the 0% (invisible) state during each image's
+        // animation-delay, so images don't all appear stacked at once
+        // before their turn in the loop.
+        "hero-crossfade": "hero-crossfade 36s ease-in-out infinite both",
       },
       backdropBlur: { xs: "2px" },
     },

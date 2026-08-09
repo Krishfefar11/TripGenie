@@ -33,6 +33,16 @@ const BudgetBreakdown = ({ breakdown }) => {
   const perDay = breakdown.perDay || (total && breakdown.days ? Math.round(total / breakdown.days) : null);
   const tier = breakdown.tier || 'budget';
 
+  // Only worth a note when cost of living actually pulled the tier away
+  // from what the raw $/day number alone would suggest — stay quiet for
+  // destinations near the 1.0 (average) baseline, or legacy saved trips
+  // from before this was tracked.
+  const costNote = breakdown.costIndex >= 1.3
+    ? 'Higher cost-of-living destination — budgeted accordingly.'
+    : breakdown.costIndex <= 0.7
+      ? 'Lower cost-of-living destination — this budget goes further.'
+      : null;
+
   const topKey = CATEGORIES.reduce((max, cat) => {
     const amt = values?.[cat.key] ?? 0;
     return amt > (values?.[max] ?? 0) ? cat.key : max;
@@ -51,6 +61,10 @@ const BudgetBreakdown = ({ breakdown }) => {
         </div>
         <span className="pill capitalize">{tier}</span>
       </div>
+
+      {costNote && (
+        <p className="mt-3 text-caption text-ink-muted">{costNote}</p>
+      )}
 
       {/* Total — the headline number */}
       <div className="mt-5 rounded-md border border-line bg-mesh-soft p-4">
