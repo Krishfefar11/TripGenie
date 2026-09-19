@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { itineraryService } from '../services/api';
 import MediaUpload from './MediaUpload';
+import ReferenceDocUpload from './ReferenceDocUpload';
 import { cn } from '../utils/cn';
 
 /** Curated starting points — still free-text editable via the input below. */
@@ -29,6 +30,7 @@ const TripForm = () => {
   });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [mediaContext, setMediaContext] = useState('');
+  const [referenceId, setReferenceId] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,7 +64,9 @@ const TripForm = () => {
     const interests = [...new Set(merged)].join(', ');
 
     try {
-      const result = await itineraryService.generate({ ...formData, interests, mediaContext });
+      const result = await itineraryService.generate({
+        ...formData, interests, mediaContext, referenceId: referenceId || undefined,
+      });
       navigate('/itinerary', { state: { itinerary: result.data } });
     } catch (err) {
       console.error('Error generating itinerary:', err);
@@ -235,6 +239,11 @@ const TripForm = () => {
 
           {/* ── Media upload ── */}
           <MediaUpload onContextChange={setMediaContext} />
+
+          <div className="rule" />
+
+          {/* ── Reference document ── */}
+          <ReferenceDocUpload onReferenceChange={setReferenceId} />
 
           <div className="rule" />
 

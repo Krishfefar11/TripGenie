@@ -35,12 +35,14 @@ const itineraryRoutes = require('./routes/itineraryRoutes');
 const chatRoutes      = require('./routes/chatRoutes');
 const tripRoutes      = require('./routes/tripRoutes');
 const mediaRoutes     = require('./routes/mediaRoutes');
+const referenceDocRoutes = require('./routes/referenceDocRoutes');
 
 app.use('/api', documentRoutes);
 app.use('/api', itineraryRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', tripRoutes);
 app.use('/api', mediaRoutes);
+app.use('/api', referenceDocRoutes);
 
 // Root — useful health/info page
 app.get('/', (req, res) => {

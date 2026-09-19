@@ -5,16 +5,22 @@
  */
 
 const { generateItinerary } = require('../services/ragPipeline');
+const referenceDocCache = require('../services/referenceDocCache');
 
 /**
  * POST /api/generate-itinerary
  * Generate a personalized travel itinerary.
- * 
- * Body: { destination, budget, days, interests, query }
+ *
+ * Body: { destination, budget, days, interests, query, referenceId? }
+ * referenceId (optional): from a prior /api/analyze-reference-doc upload —
+ * resolved to that document's embedded chunks. Only removed from the cache
+ * once generation actually succeeds, so a failed/retried request doesn't
+ * make the user re-upload.
  */
 async function generateItineraryHandler(req, res) {
   try {
-    const { destination, budget, days, interests, query, mediaContext } = req.body;
+    const { destination, budget, days, interests, query, mediaContext, referenceId } = req.body;
+    const extraChunks = referenceId ? referenceDocCache.get(referenceId) || [] : [];
 
     // Validate required fields
     if (!destination) {
@@ -35,7 +41,10 @@ async function generateItineraryHandler(req, res) {
       interests: Array.isArray(interests) ? interests : interests?.split(',').map((s) => s.trim()) || [],
       query: query || `Plan a ${days}-day trip to ${destination}`,
       mediaContext: mediaContext || undefined,
+      extraChunks,
     });
+
+    if (referenceId) referenceDocCache.remove(referenceId);
 
     res.json({
       success: true,

@@ -87,10 +87,22 @@ function rankIndicesByScore(scores) {
  * @param {number[]} queryVector - embedding of the query
  * @param {string} queryText - raw query text (for BM25)
  * @param {number} topN - number of fused candidates to return
+ * @param {Array<{chunkText: string, vector: number[]}>} [extraChunks] - ad-hoc
+ *   chunks to search alongside the stored corpus (e.g. a user-uploaded
+ *   reference document for this one request). Never persisted to Mongo —
+ *   scored in the same BM25+cosine+RRF pass as everything else, so they
+ *   compete for rank on equal footing rather than being tacked on after.
  * @returns {Array<{chunkText, documentId, chunkIndex, cosineScore, bm25Score, fusedScore}>}
  */
-async function searchHybrid(queryVector, queryText, topN = 10) {
-  const allEmbeddings = await Embedding.find({}).limit(2000).lean();
+async function searchHybrid(queryVector, queryText, topN = 10, extraChunks = []) {
+  const stored = await Embedding.find({}).limit(2000).lean();
+  const userChunks = extraChunks.map((c, i) => ({
+    chunkText: c.chunkText,
+    documentId: 'user-reference',
+    chunkIndex: i,
+    vector: c.vector,
+  }));
+  const allEmbeddings = [...userChunks, ...stored];
   if (allEmbeddings.length === 0) return [];
 
   const cosine = allEmbeddings.map((e) => cosineSimilarity(queryVector, e.vector));

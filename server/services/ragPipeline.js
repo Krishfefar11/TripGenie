@@ -112,14 +112,21 @@ Provide a helpful, detailed response about travel planning. Be specific with rec
 /**
  * Generate a travel itinerary using the full RAG pipeline.
  *
- * @param {object} params - { destination, budget, days, interests, query, mediaContext }
+ * @param {object} params - { destination, budget, days, interests, query, mediaContext, extraChunks }
  * @param {string} [params.mediaContext] - Extracted text from a user-uploaded
  *   photo/video/document (see mediaAnalysisService) — folded into both the
  *   retrieval query and the generation prompt when present.
+ * @param {Array<{chunkText: string, vector: number[]}>} [params.extraChunks] -
+ *   Embedded chunks from a user-uploaded reference document (see
+ *   referenceDocController), searched alongside the seeded corpus for this
+ *   request only. Unlike mediaContext (raw text stuffed into the prompt),
+ *   these go through the same hybrid search + rerank + relevance gate as
+ *   everything else — the document has to actually match the query to be
+ *   used, it isn't unconditionally injected.
  * @returns {object} Structured itinerary with all advanced features
  */
 async function generateItinerary(params) {
-  const { destination, budget, days, interests, query, mediaContext } = params;
+  const { destination, budget, days, interests, query, mediaContext, extraChunks } = params;
 
   console.log(`\n🧞 Generating itinerary for ${destination} (${days} days, $${budget})${mediaContext ? ' [with uploaded media context]' : ''}`);
 
@@ -137,7 +144,10 @@ async function generateItinerary(params) {
 
     // Step 3: Retrieve relevant chunks — hybrid (dense + BM25 via RRF) fused
     // candidates first, then a cross-encoder reranks down to the final top-K.
-    const candidates = await searchHybrid(queryVector, searchQuery, 15);
+    // extraChunks (a user-uploaded reference doc, if any) are searched in the
+    // same pass as the seeded corpus, not appended afterward — so the two
+    // sources compete for rank on equal footing.
+    const candidates = await searchHybrid(queryVector, searchQuery, 15, extraChunks);
     context = await rerank(searchQuery, candidates, 5);
     if (context.length === 0) {
       console.log(`⚠️ No relevant corpus context for "${destination}" — falling back to the LLM's general knowledge`);

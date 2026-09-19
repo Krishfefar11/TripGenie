@@ -66,6 +66,19 @@ export const mediaService = {
   },
 };
 
+export const referenceDocService = {
+  analyze: async (file) => {
+    const formData = new FormData();
+    formData.append('document', file);
+    const response = await api.post('/analyze-reference-doc', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
+
 export const documentService = {
   upload: async (file) => {
     const formData = new FormData();
